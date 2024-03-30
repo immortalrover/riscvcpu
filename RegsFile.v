@@ -29,7 +29,7 @@ module RegsFile(
         // DO NOT CHANGE THIS display LINE!!!
         // 不要修改下面这行display语句！！！
         /**********************************************************************/
-        /* $display("x%d = %h", regsWriteNum, regsWriteData); */
+        $display("x%d = %h", regsWriteNum, regsWriteData);
         /**********************************************************************/
       end
 

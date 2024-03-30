@@ -1,14 +1,14 @@
 `timescale 1ns/1ns
-module xgriscv_tb();
-    
-   reg                  clk, rstn;
-   wire[31:0] pc;
-   wire  [31:0] instr;
-   wire        memWrite;
-   wire[31:0]  writeData;
-   wire[31:0] aluX;
-   wire[31:0] aluY;
-   wire[31:0] aluO;
+
+module CPU_tb();
+	reg                  clk, rstn;
+  wire[31:0] pc;
+  wire  [31:0] instr;
+  wire        memWrite;
+  wire[31:0]  writeData;
+  wire[31:0] aluX;
+  wire[31:0] aluY;
+  wire[31:0] aluO;
     
    // instantiation of xgriscv_sc
    xgriscv_sc sc(clk, rstn, pc,instr,memWrite,writeData,aluX,aluY,aluO);

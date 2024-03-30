@@ -1,15 +1,5 @@
-module imem(
-  input  [31:0]   a,
-  output [31:0]  rd
-  );
 
-  reg [31:0] RAM[0:1023];
-
-  assign rd = RAM[a[11:2]]; // instruction size aligned
-endmodule
-
-
-module dmem(input                     clk, we,
+module DataMem(input                     clk, we,
             input  [31:0]        a, wd,
             input  [31:0]   pc,
             output [31:0]        rd);

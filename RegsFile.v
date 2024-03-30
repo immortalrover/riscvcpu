@@ -1,12 +1,12 @@
 module RegsFile(
   input           clk,
-  input  [4:0]  	regsNum0,
-  input  [4:0]  	regsNum1,
-  output [31:0]   regsReadData0,
-  output [31:0]   regsReadData1,
+  input  [4:0]  	regNum0,
+  input  [4:0]  	regNum1,
+  output [31:0]   regReadData0,
+  output [31:0]   regReadData1,
   input           regsWriteEnable, // 1 => WRITE, Default Read
-  input  [4:0]  	regsWriteNum,
-  input  [31:0]   regsWriteData
+  input  [4:0]  	regWriteNum,
+  input  [31:0]   regWriteData
   );
 
   reg [31:0] regs[31:0];
@@ -23,16 +23,16 @@ module RegsFile(
   // register 0 hardwired to 0
 
   always @(negedge clk)
-    if (regsWriteEnable && regsWriteNum != 0)
+    if (regsWriteEnable && regWriteNum != 0)
       begin
-        regs[regsWriteNum] <= regsWriteData;
+        regs[regWriteNum] <= regWriteData;
         // DO NOT CHANGE THIS display LINE!!!
         // 不要修改下面这行display语句！！！
         /**********************************************************************/
-        $display("x%d = %h", regsWriteNum, regsWriteData);
+        $display("x%d = %h", regWriteNum, regWriteData);
         /**********************************************************************/
       end
 
-  assign regsReadData0 = (regsNum0 != 0) ? regs[regsNum0] : 0;
-  assign regsReadData1 = (regsNum1 != 0) ? regs[regsNum1] : 0;
+  assign regReadData0 = (regNum0 != 0) ? regs[regNum0] : 0;
+  assign regReadData1 = (regNum1 != 0) ? regs[regNum1] : 0;
 endmodule

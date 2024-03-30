@@ -1,6 +1,6 @@
 BUILD_DIR		:= build
 SOURCES			:= $(shell find . -name '*.v' -not -path './tb/*')
-SOURCES_SELECT 	:= DataMem.v tb/DataMem_tb.v
+SOURCES_SELECT	:= ALU.v tb/ALU_tb.v Defines.v
 COMPILER		:= iverilog
 RUNTIME			:= vvp
 SHOW			:= gtkwave

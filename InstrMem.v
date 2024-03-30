@@ -1,7 +1,7 @@
 module InstrMem(
-  input  [31:0]   instrAddr,
+  input  [31:0]		instrAddr,
   output [31:0]		instrData
-  );
+);
 
   reg [31:0] RAM[0:1023];
 

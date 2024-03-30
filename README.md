@@ -1,53 +1,49 @@
-# cod-singlecyclecpu
-# 这是武汉大学计算机学院计算机组成与设计课程设计的一部分
-# RISC-V 单周期实现
+# singlecyclecpu
 
-注意事项：
-1. regfile.v
-参考给你的regfile.v文件，修改你的寄存器实现，在寄存器值被修改时，输出修改它的指令地址、被修改的寄存器地址和被修改的值。
-这里分别是pc、wa3和wd3，替换成你的实现中的线或者值。
-务必保持格式不变！
+> 来自武汉大学计算机学院计算机组成与设计课程设计
+> RISC-V 实现
 
-	// DO NOT CHANGE THIS display LINE!!!
-	// 不要修改下面这行display语句！！！
-	/**********************************************************************/
-    	$display("x%d = %h", wa3, wd3);
-	/**********************************************************************/
+## 仓库介绍
 
-1. testbench.v
-testbench文件中的打印语句可以用于调试，但是正式提交评测时会使用服务器上的tb文件，其中是没有这些打印语句的
-务必保持tb文件中CPU模块的模块名和引脚名不变
-xgriscv：RISC-V CPU模块；clk：时钟；rstn：reset；pc：当前正在执行的指令的pc
+个人认为对CPU设计的关键之处在于译码阶段。
+但是在本科教学阶段，学校并没有过深讲述译码这个过程，而是更多的强调学生的动手能力。
+实验课上，交给学生一个勉强够用的模板文件便草草了事。
 
-   // instantiation of xgriscv_sc
-   xgriscv_sc xgriscv(clk, rstn, pc);
+个人认为学校的模板并没有降低设计的难度，反而增加了阅读所需要的成本。
+于是我决定跟据自己的想法实现一部分更好的代码，拥有更清晰、更完整的逻辑框架，而不仅仅局限于学校的教学目标。
 
-其他文件中的模块和引脚名可自定义
+## 思路设计
 
-指令内存的存放指令的模块名也不能变
+个人认为要实现一个好的CPU，可以先考虑实现一些逻辑独立的单元，并分开单独测试。
+这样可以避免出现bug的时候，无从下手debug的窘境。
 
-    // input instruction for simulation
-    $readmemh("riscv32_sim1.dat", xgriscv.U_imem.RAM);
+主要就是从易到难。
 
-testbench文件中下述语句是用来让仿真在执行完后停止，需要根据每个测试程序的大小进行调整，设置为最后一条指令的地址即可
+### 较简单的模块
 
-	if (pc == 32'h80000078) // set to the address of the last instruction
-    begin
+我认为封装下面这些模块对整个项目的设计来说影响不会太大，一旦写好了就基本不需要维护。
 
-    	$stop;
-    end
+-   RegsFile：这个文件是一个寄存器堆，需要根据寄存器数字读写数据。
+-   InstrMem：存储待运行指令的一个地方，需要读取外部文件，根据传入的地址读取相应的指令。
+-   DataMem：存储数据的一个地方，实现的功能主要是模仿硬盘，根据传入的地址读写相应的数据。
 
-## Getting started
+#### 测试方法
 
-create a file named xgriscv_defines.v
-write
+根据需求修改MakeFile，包括但不限于在SOURCES_SELECT中填写对应的文件名、修改成您的verilog编译器、修改成您的仿真环境。
 
-	`define ADDR_SIZE 32
-	`define INSTR_SIZE 32
-	`define IMEM_SIZE 1024
-	`define RFIDX_WIDTH 5
-	`define XLEN 32
-	`define RFREG_NUM 32
+### 稍微复杂的模块
 
-## next
+-   ALU：算术运算单元，需要根据不同的指令进行不同的二元运算。
+-   InstrProc：实现的功能主要是计算一些指令所需要的立即数。
 
+#### ALU
+
+将一系列可进行的二元运算添加合适的操作名，并且写入Defines.v文件以避免重复定义。
+
+#### InstrProc
+
+原身为一个立即数生成器，但经过实际设计后发现，与其写入一个单独的模块，不如将其写在每个单周期过程的开头，这样能够节省一些不必要的线设计。
+
+### 复杂的模块
+
+-   InstrDec：处理整个CPU的逻辑，让不同的指令进行不同的操作。

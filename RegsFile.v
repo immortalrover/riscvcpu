@@ -4,7 +4,7 @@ module RegsFile(
   input  [4:0]  	regsNum1,
   output [31:0]   regsReadData0,
   output [31:0]   regsReadData1,
-  input           regsWriteEnable, // 1 => WRITE, 0 => READ
+  input           regsWriteEnable, // 1 => WRITE, Default Read
   input  [4:0]  	regsWriteNum,
   input  [31:0]   regsWriteData
   );

@@ -1,4 +1,4 @@
-`timescale 1ns/1ps
+`timescale 1ns/1ns
 module InstrMem_tb();
   reg		[31:0]	PC;
   wire	[31:0]	instrData;
@@ -10,5 +10,5 @@ module InstrMem_tb();
     PC = 0;
   end
   always #50 PC = PC + 4;
-  InstrMem instr(.PC(PC), .instrData(instrData));
+  InstrMem instr(.instrAddr(PC), .instrData(instrData));
 endmodule

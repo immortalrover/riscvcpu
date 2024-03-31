@@ -1,13 +1,16 @@
 module InstrProc (
 	input							clk,
 	input		[31:0]		instr,
-	output  [31:0]		immGen
+	output	[31:0]		result
+	/* output  [31:0]		immGen */
 );
 
 	wire	[6:0]		opcode = instr[6:0];
 	wire	[2:0]		func3 = instr[14:12];
 	wire	[6:0]		func7 = instr[31:25];
-
+	wire	[4:0]		regNum0 = instr[19:15];
+	wire	[4:0]		regNum1 = instr[24:20];
+	
 	reg		[31:0]	imm;
 	always @(posedge clk)
 	begin
@@ -30,5 +33,6 @@ module InstrProc (
 		endcase
 	end
 
-	assign immGen = imm;
+	InstrDec ID(clk, opcode, func3, func7, imm, regNum0, regNum1, aluO);
+	/* assign immGen = imm; */
 endmodule;

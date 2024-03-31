@@ -1,5 +1,5 @@
 `timescale 1ns/1ps
-module xgriscv_tb_id();
+module InstrDec_tb();
     
    reg         clk;
    reg   [6:0] opcode;

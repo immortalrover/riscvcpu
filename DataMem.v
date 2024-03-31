@@ -1,5 +1,5 @@
 module DataMem(
-	input						clk,
+	input						clk, // TARGET: delete the clk
 	input						memWriteEnable, // 1 => Write, Default Read
   input  [31:0]		memAddr, 
   input  [31:0]		memWriteData, 
@@ -11,7 +11,7 @@ module DataMem(
 
   assign memReadData = RAM[memAddr[11:2]]; 
 
-  always @(posedge clk)
+  always @(posedge clk) // TRY: use posedge memWriteEnable
     if (memWriteEnable)
       begin
         RAM[memAddr[11:2]] = memWriteData;

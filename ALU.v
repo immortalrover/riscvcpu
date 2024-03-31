@@ -1,6 +1,6 @@
 `include "Defines.v"
 module ALU (
-  input                 clk,
+  input                 clk, // TARGET: delete the clk
   input         [3:0]   aluOp,
   input         [31:0]  aluX,
   input         [31:0]  aluY,
@@ -8,7 +8,8 @@ module ALU (
 );
 
 reg [31:0] result;
-always @(posedge clk) begin
+always @(posedge clk)
+begin
   case (aluOp)
 		`ADD:                        result <= aluX +  aluY;
 		`SUB:                        result <= aluX -  aluY;

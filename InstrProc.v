@@ -15,20 +15,20 @@ module InstrProc (
 	always @(posedge clk)
 	begin
 		case(opcode)
-			7'b0010011, 7'b1100111, 7'b0000011:	// TypeI
+			7'b0010011, 7'b1100111, 7'b0000011:	// FMT I
 				case(func3)
 					3'b001, 3'b101: 
 						imm <= { 20'b0, instr[31:20] };
 					default:
 						imm <= { { 21{ instr[31] } }, instr[30:20] };
 				endcase
-			7'b0100011:	// TypeS
+			7'b0100011:	// FMT S
 				imm	<= { { 21{ instr[31] } }, instr[30:25], instr[11:7] };
-			7'b1100011: // TypeB
+			7'b1100011: // FMT B
 				imm <= { { 20{ instr[31] } }, instr[7], instr[30:25], instr[11:8], 1'b0 };
-			7'b0010111, 7'b0110111: // TypeU
+			7'b0010111, 7'b0110111: // FMT U
 				imm <= { instr[31:12], 12'b0 };
-			7'b1101111: // TypeJ
+			7'b1101111: // FMT J
 				imm <= { { 13{ instr[31] } }, instr[19:12], instr[20], instr[30:21], 1'b0 };
 		endcase
 	end

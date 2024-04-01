@@ -15,7 +15,7 @@ wire	[31:0]	regReadData0;
 wire	[31:0]	regReadData1;
 wire					regsWriteEnable;
 wire	[4:0]		regWriteNum;
-wire	[31:0]	regWriteData = aluO; // warning
+wire	[31:0]	regWriteData = aluO; // WAITING
 
 RegsFile RF(clk, regNum0, regNum1, regReadData0, regReadData1, regsWriteEnable, regWriteNum, regWriteData);
 
@@ -39,7 +39,6 @@ begin
 			aluX					<= regReadData0;
 			aluY					<= regReadData1;
 
-			regWriteData		<= aluO; // consider assign
 			regsWriteEnable <= 1;
 		end
 		7'b0110011: // FMT I
@@ -122,6 +121,5 @@ begin
 	endcase
 end
 
-ALU	alu(clk, aluOp, aluX, aluY, aluO);
-/* assign aluOp = OP; */
+ALU	alu(aluOp, aluX, aluY, aluO);
 endmodule

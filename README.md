@@ -30,13 +30,20 @@
 
 我认为封装下面这些模块对整个项目的设计来说影响不会太大，一旦写好了就基本不需要维护。
 
--   RegsFile：这个文件是一个寄存器堆，需要根据寄存器数字读写数据。
 -   InstrMem：存储待运行指令的一个地方，需要读取外部文件，根据传入的地址读取相应的指令。
+-   RegsFile：这个文件是一个寄存器堆，需要根据寄存器数字读写数据。
 -   DataMem：存储数据的一个地方，实现的功能主要是模仿硬盘，根据传入的地址读写相应的数据。
 
 ### 测试方法
 
 根据需求修改MakeFile，包括但不限于在SOURCES_SELECT中填写对应的文件名、修改成您的verilog编译器、修改成您的仿真环境。
+
+已经经过测试可以正常使用的模块：
+
+-   InstrMem.v tb/InstrMem_tb.v
+-   RegsFile.v tb/RegsFile_tb.v
+-   DataMem.v tb/DataMem_tb.v
+-   ALU.v tb/ALU_tb.v Defines.v
 
 ## 稍微复杂的模块
 

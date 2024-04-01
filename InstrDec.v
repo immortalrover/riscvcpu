@@ -4,22 +4,26 @@ module InstrDec (
 	input		[6:0]		opcode,
 	input		[2:0]		func3,
 	input		[6:0]		func7,
-	input		[31:0]	imm,
+	input		[4:0]		regWriteNum,
 	input		[4:0]		regNum0,
 	input		[4:0]		regNum1,
+	input		[31:0]	imm,
 	output	[31:0]	aluO
 	/* output [3:0] aluOp */
 );
 
+reg					regsWriteEnable;
 wire	[31:0]	regReadData0;
 wire	[31:0]	regReadData1;
-wire					regsWriteEnable;
-wire	[4:0]		regWriteNum;
 wire	[31:0]	regWriteData = aluO; // WAITING
 
 RegsFile RF(clk, regNum0, regNum1, regReadData0, regReadData1, regsWriteEnable, regWriteNum, regWriteData);
 
+reg [31:0] aluX;
+reg [31:0] aluY;
 reg [3:0] aluOp;
+
+ALU	alu(aluOp, aluX, aluY, aluO);
 
 always @(posedge clk)
 begin
@@ -41,7 +45,7 @@ begin
 
 			regsWriteEnable <= 1;
 		end
-		7'b0110011: // FMT I
+		7'b0010011: // FMT I
 		begin
 			case (func3)
 				0: aluOp		<= `ADD;	// addi
@@ -56,7 +60,6 @@ begin
 			aluX					<= regReadData0;
 			aluY					<= imm;
 
-			regWriteData		<= aluO; // consider assign
 			regsWriteEnable <= 1;
 		end
 		7'b0000011: // FMT I lb lh lw lbu lhu
@@ -92,7 +95,7 @@ begin
 		end
 		7'b1101111: // FMT J jal
 		begin
-			aluX					<= ; // WAITING
+			aluX					<= 0; // WAITING
 			aluY					<= imm;
 			aluOp					<= `ADD;
 
@@ -112,7 +115,7 @@ begin
 		end
 		7'b0010111: // FMT U auipc
 		begin
-			aluX					<= ; // WAITING
+			aluX					<= 0; // WAITING
 			aluY					<= imm;
 			aluOp					<= `ADD;
 
@@ -120,6 +123,4 @@ begin
 		end
 	endcase
 end
-
-ALU	alu(aluOp, aluX, aluY, aluO);
 endmodule

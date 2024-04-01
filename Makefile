@@ -1,6 +1,6 @@
 BUILD_DIR		:= build
 SOURCES			:= $(shell find . -name '*.v' -not -path './tb/*')
-SOURCES_SELECT	:= ALU.v tb/ALU_tb.v Defines.v
+SOURCES_SELECT	:= InstrDec.v tb/InstrDec_tb.v RegsFile.v ALU.v Defines.v
 COMPILER		:= iverilog
 RUNTIME			:= vvp
 SHOW			:= gtkwave

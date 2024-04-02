@@ -1,4 +1,4 @@
-module InstrProc (
+module Breakdown (
 	input							clk,
 	input		[31:0]		instr,
 	output	[31:0]		result
@@ -35,6 +35,6 @@ module InstrProc (
 		endcase
 	end
 
-	InstrDec ID(clk, opcode, func3, func7, regWriteNum, regNum0, regNum1, imm, aluO);
+	Decode ID(clk, opcode, func3, func7, regWriteNum, regNum0, regNum1, imm, aluO);
 	/* assign immGen = imm; */
 endmodule;

@@ -1,5 +1,5 @@
 `timescale 1ns/1ns
-module InstrDec_tb();
+module Decode_tb();
   reg						clk;
   reg		[6:0]		opcode;
   reg		[2:0]		func3;

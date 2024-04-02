@@ -44,6 +44,7 @@
 -   RegsFile.v tb/RegsFile_tb.v
 -   DataMem.v tb/DataMem_tb.v
 -   ALU.v tb/ALU_tb.v Defines.v
+-   ProgramCounter tb/ProgramCounter_tb.v
 
 ## 稍微复杂的模块
 

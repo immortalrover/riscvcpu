@@ -1,4 +1,4 @@
-module InstrProc_tb();
+module Breakdown_tb();
 	reg						clk;
 	reg		[31:0]	instr;
 	wire	[31:0]	immGen;

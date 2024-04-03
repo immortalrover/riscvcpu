@@ -12,46 +12,54 @@ module Decode (
 	/* output [3:0] aluOp */
 );
 
-reg						regsWriteEnable;
-wire	[31:0]	regReadData0;
-wire	[31:0]	regReadData1;
-wire	[31:0]	regWriteData = memReadEnable ? memDataProcessed : aluO; // WAITING
-RegsFile RF(clk, regNum0, regNum1, regReadData0, regReadData1, regsWriteEnable, regWriteNum, regWriteData);
+wire	[31:0]	pcReadData;
+wire					pcWriteEnable;
+reg		[31:0]	pcWriteData;
+reg		[2:0]		pcOp;
+ProgramCounter PC(pcReadData, pcWriteEnable, pcWriteData, pcOp);
 
 reg		[3:0]		aluOp;
 reg		[31:0]	aluX;
 reg		[31:0]	aluY;
+wire	[31:0]	aluO;
 ALU	alu(aluOp, aluX, aluY, aluO);
 
-wire	[31:0]	memAddr = aluO;
-reg						memReadEnable;
-wire	[31:0]	memReadData;
-reg						memWriteEnable;
-reg		[31:0]	memWriteData;
-reg		[31:0]	PC;
-DataMem mem(memAddr, memReadEnable, memReadData, memWriteEnable, memWriteData, PC);
+wire					regsWriteEnable;
+wire	[31:0]	regReadData0;
+wire	[31:0]	regReadData1;
+reg		[31:0]	regWriteData;
+RegsFile RF(clk, regNum0, regNum1, regReadData0, regReadData1, regsWriteEnable, regWriteNum, regWriteData);
 
-wire	[1:0]		numberOfBytes	= func3[1:0];
-reg		[31:0]	memDataProcessed;
+reg		[31:0]	memAddr;
+wire					memReadEnable;
+wire	[31:0]	memReadData;
+wire					memWriteEnable;
+reg		[31:0]	memWriteData;
+DataMem mem(memAddr, memReadEnable, memReadData, memWriteEnable, memWriteData, pcReadData);
+
+reg		[2:0]		state;
+Controller control(state, regsWriteEnable, memReadEnable, memWriteEnable, pcWriteEnable);
+
 always @(posedge clk)
 begin
 	case (opcode)
 		7'b0110011: // FMT R
 		begin
 			case (func3)
-				0: aluOp		<= func7[5] ? `SUB : `ADD;	// add sub
-				1: aluOp		<= `ShiftLeftUnsigned;	// sll
-				2: aluOp		<= `LesserThanSigned;	// slt
-				3: aluOp		<= `LesserThanUnsigned; // sltu
-				4: aluOp		<= `XOR; // xor
-				5: aluOp		<= func7[5] ?	`ShiftRightSigned : `ShiftRightUnsigned; // srl sra
-				6: aluOp		<= `OR; // or
-				7: aluOp		<= `AND; // and
+				0: aluOp		<=	func7[5] ? `SUB : `ADD;	// add sub
+				1: aluOp		<=	`ShiftLeftUnsigned;	// sll
+				2: aluOp		<=	`LesserThanSigned;	// slt
+				3: aluOp		<=	`LesserThanUnsigned; // sltu
+				4: aluOp		<=	`XOR; // xor
+				5: aluOp		<=	func7[5] ?	`ShiftRightSigned : `ShiftRightUnsigned; // srl sra
+				6: aluOp		<=	`OR; // or
+				7: aluOp		<=	`AND; // and
 			endcase
-			aluX					<= regReadData0;
-			aluY					<= regReadData1;
+			aluX					=		regReadData0;
+			aluY					=		regReadData1;
 
-			regsWriteEnable <= 1;
+			state					<=	`ALUtoRegs;
+			regWriteData	<=	aluO;
 		end
 		7'b0010011: // FMT I
 		begin
@@ -78,9 +86,9 @@ begin
 
 			memReadEnable	<= 1;
 			case (numberOfBytes)
-				0: memDataProcessed <= { { 24{ memReadData[7] } }, memReadData[7:0] }; // lb lbu
-				1: memDataProcessed <= { { 16{ memReadData[15] } }, memReadData[15:0] }; // lh lhu
-				2: memDataProcessed <= memReadData; // lw
+				0: regWriteData <= { { 24{ memReadData[7] } }, memReadData[7:0] }; // lb lbu
+				1: regWriteData <= { { 16{ memReadData[15] } }, memReadData[15:0] }; // lh lhu
+				2: regWriteData <= memReadData; // lw
 			endcase
 			regsWriteEnable	<= 1;
 
@@ -93,7 +101,7 @@ begin
 			aluOp					<= `ADD;
 			
 			memAddr				<= aluO;
-			case (numberOfBytes)
+			case (func3)
 				0: memWriteData <= { { 24{ regReadData1[7] } }, regReadData1[7:0] }; // sb
 				1: memWriteData <= { { 16{ regReadData1[15] } }, regReadData1[15:0] }; // sh
 				2: memWriteData <= regReadData1; // sw
@@ -115,6 +123,9 @@ begin
 			aluX					<= regReadData0;
 			aluY					<= regReadData1;
 
+			pcWriteEnable	<= aluO;
+			pcWriteData		<= imm;
+			pcOp					<= 1;
 			// WAITING
 		end
 		7'b1101111: // FMT J jal
@@ -133,20 +144,34 @@ begin
 			aluY					<= imm;
 			aluOp					<= `ADD;
 			
+			regsWriteEnable <= 1;
+			regWriteData	<= PC;
+
+			pcWriteEnable	<= 1;
+			pcWriteData		<= aluO;
 			// WAITING PC
 		end
 		7'b0110111: // FMT U lui
 		begin
-			// WAITING
+			regsWriteEnable	<= 1;
+			regWriteData	<= imm;
 		end
 		7'b0010111: // FMT U auipc
 		begin
-			aluX					<= 0; // WAITING
+			aluX					<= pcReadData; // WAITING
 			aluY					<= imm;
 			aluOp					<= `ADD;
 
+			regsWriteEnable <= 1;
+			regWriteData	<= aluO;
 			// WAITING
 		end
+		default: state <= `IDLE;
 	endcase
+end
+
+always @(negedge clk)
+begin
+	state	<= `IDLE;
 end
 endmodule

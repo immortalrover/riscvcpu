@@ -1,3 +1,10 @@
+// States
+`define IDLE													3'h0
+`define RegsWrite											3'h1
+`define	MemtoRegs											3'h2
+`define	MemWrite											3'h3
+`define PCWrite												3'h4
+
 // ALU operation
 `define ADD														4'h0
 `define SUB														4'h1

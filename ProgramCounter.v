@@ -1,6 +1,6 @@
 module ProgramCounter (
-	input							clk,
 	output	[31:0]		pcReadData,
+	input							pcWriteEnable,	// 1 <= Write
 	input		[31:0]		pcWriteData,
 	input		[2:0]			pcOp
 );
@@ -8,10 +8,10 @@ module ProgramCounter (
 reg	[31:0] PC;
 
 initial begin
-	PC <= 0;
+	PC = 0;
 end
 
-always @(posedge clk)
+always @(posedge pcWriteEnable)
 begin
 	case (pcOp)
 		0: PC <= PC + 4;

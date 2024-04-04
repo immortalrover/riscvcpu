@@ -3,29 +3,27 @@ module ALU (
   input         [3:0]   aluOp,
   input         [31:0]  aluX,
   input         [31:0]  aluY,
-  output        [31:0]  aluO
+  output reg    [31:0]  aluO
 );
 
-reg [31:0] result;
 always @(*)
 begin
   case (aluOp)
-		`ADD:                        result <= aluX +  aluY;
-		`SUB:                        result <= aluX -  aluY;
-		`OR:                         result <= aluX |  aluY;
-		`XOR:                        result <= aluX ^  aluY;
-		`AND:                        result <= aluX &  aluY;
-		`LesserThanUnsigned:         result <= aluX <  aluY;
-		`LesserThanSigned:           result <= $signed(aluX) < $signed(aluY);
-		`ShiftRightUnsigned:         result <= aluX >> (aluY[4:0]);
-		`ShiftRightSigned:           result <= $signed(aluX) >>> (aluY[4:0]);
-		`ShiftLeftUnsigned:          result <= aluX << (aluY[4:0]);
-		`GreaterThanOrEqualUnsigned: result <= aluX >= aluY;
-		`GreaterThanOrEqualSigned:   result <= $signed(aluX) >= $signed(aluY);
-		`Equal:                      result <= aluX == aluY;
-		`NotEqual:                   result <= aluX != aluY;
+		`ADD:													aluO = aluX +  aluY;
+		`SUB:													aluO = aluX -  aluY;
+		`OR:													aluO = aluX |  aluY;
+		`XOR:													aluO = aluX ^  aluY;
+		`AND:													aluO = aluX &  aluY;
+		`LesserThanUnsigned:					aluO = aluX <  aluY;
+		`LesserThanSigned:						aluO = $signed(aluX) < $signed(aluY);
+		`ShiftRightUnsigned:					aluO = aluX >> (aluY[4:0]);
+		`ShiftRightSigned:						aluO = $signed(aluX) >>> (aluY[4:0]);
+		`ShiftLeftUnsigned:						aluO = aluX << (aluY[4:0]); 
+		`ShiftLeftSigned:							aluO = aluX << (aluY[4:0]);
+		`GreaterThanOrEqualUnsigned:	aluO = aluX >= aluY;
+		`GreaterThanOrEqualSigned:		aluO = $signed(aluX) >= $signed(aluY);
+		`Equal:												aluO = aluX == aluY;
+		`NotEqual:										aluO = aluX != aluY;
   endcase
 end
-assign aluO = result;
-
 endmodule

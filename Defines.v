@@ -1,3 +1,8 @@
+// PC
+`define	PCAdd4												3'h0
+`define	PCAddImm											3'h1
+`define	PCSetImm											3'h2
+
 // States
 `define IDLE													3'h0
 `define RegsWrite											3'h1

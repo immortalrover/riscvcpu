@@ -1,6 +1,6 @@
 BUILD_DIR		:= build
 SOURCES			:= $(shell find . -name '*.v' -not -path './tb/*') tb/CPU_tb.v
-SOURCES_SELECT	:= ProgramCounter.v tb/ProgramCounter_tb.v Defines.v
+SOURCES_SELECT	:= 
 COMPILER		:= iverilog
 RUNTIME			:= vvp
 SHOW			:= gtkwave

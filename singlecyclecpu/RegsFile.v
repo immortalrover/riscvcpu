@@ -1,5 +1,6 @@
 module RegsFile(
   input           clk,
+	input						reset,
   input  [4:0]  	regNum0,
   input  [4:0]  	regNum1,
   output [31:0]   regReadData0,
@@ -18,6 +19,10 @@ initial begin
   for ( i = 0; i < 32; i=i+1)  regs[i] = 0;
 end
 
+always @(*)
+begin
+	if (reset) for ( i = 0; i < 32; i=i+1)  regs[i] = 0;
+end
 // three ported register file
 // read two ports combinationally
 // write third port on falling edge of clock

@@ -1,6 +1,7 @@
 `include "Defines.v"
 module Decode (
 	input						clk,
+	input						reset,
 	input		[6:0]		opcode,
 	input		[2:0]		func3,
 	input		[6:0]		func7,
@@ -11,7 +12,6 @@ module Decode (
 	output	[31:0]	pcReadData
 );
 
-/* wire	[31:0]	pcReadData; */
 wire					pcWriteEnable;
 reg		[31:0]	pcWriteData;
 reg		[2:0]		pcOp;
@@ -27,7 +27,7 @@ wire	[31:0]	regReadData0;
 wire	[31:0]	regReadData1;
 wire					regsWriteEnable;
 reg		[31:0]	regWriteData;
-RegsFile RF(clk, regNum0, regNum1, regReadData0, regReadData1, regsWriteEnable, regWriteNum, regWriteData);
+RegsFile RF(clk, reset,regNum0, regNum1, regReadData0, regReadData1, regsWriteEnable, regWriteNum, regWriteData);
 
 reg		[31:0]	memAddr;
 wire					memReadEnable;
@@ -41,7 +41,18 @@ Controller control(state, regsWriteEnable, memReadEnable, memWriteEnable, pcWrit
 
 always @(*)
 begin
-	if (clk)
+	if (reset) begin
+		aluOp						=	`ADD;
+		aluX						=	0;
+		aluY						=	0;
+		pcWriteData			=	0;
+		pcOp						=	`PCClear;
+		regWriteData		=	0;
+		memAddr					=	0;
+		memWriteData		=	0;
+		state						=	`IDLE;
+	end
+	else if (clk)
 	begin
 	case (opcode)
 		7'b0110011: // FMT R
@@ -159,7 +170,7 @@ begin
 		end
 		7'b0010111: // FMT U auipc
 		begin
-			aluX					=	pcReadData; // WAITING
+			aluX					=	pcReadData;
 			aluY					=	imm;
 			aluOp					=	`ADD;
 

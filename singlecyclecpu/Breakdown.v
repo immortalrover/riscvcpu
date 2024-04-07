@@ -1,5 +1,6 @@
 module Breakdown (
 	input							clk,
+	input							reset,
 	input		[31:0]		instr,
 	output	[31:0]		pcReadData
 );
@@ -13,6 +14,11 @@ wire	[4:0]		regNum0			= instr[19:15];
 wire	[4:0]		regNum1			= instr[24:20];
 
 reg		[31:0]	imm;
+
+initial begin
+	imm = 0;
+end
+
 always @(*)
 begin
 	case(opcode)
@@ -36,6 +42,6 @@ begin
 	endcase
 end
 
-Decode ID(clk, opcode, func3, func7, regWriteNum, regNum0, regNum1, imm, pcReadData);
+Decode ID(clk, reset, opcode, func3, func7, regWriteNum, regNum0, regNum1, imm, pcReadData);
 /* assign immGen = imm; */
 endmodule;

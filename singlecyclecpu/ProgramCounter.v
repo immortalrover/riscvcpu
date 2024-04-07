@@ -21,6 +21,7 @@ begin
 			`PCAdd4:		PC	<=	PC + 4;
 			`PCAddImm:	PC	<=	PC + pcWriteData;
 			`PCSetImm:	PC	<=	pcWriteData;
+			`PCClear:		PC	<=	0;
 		endcase
 	end
 end

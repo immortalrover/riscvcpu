@@ -2,9 +2,10 @@
 
 module CPU_tb();
 reg					clk;
-wire[31:0] pc;
+reg					reset;
+wire[31:0]	pc;
     
-CPU cpu(clk, pc);
+CPU cpu(clk, reset, pc);
 
 integer counter = 0;
 

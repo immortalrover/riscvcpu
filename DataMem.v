@@ -11,6 +11,7 @@ module DataMem(
 reg  [31:0] RAM[0:1023];
 
 assign memReadData = memReadEnable ? RAM[memAddr[11:2]] : 0; 
+
 always @(*)
 begin
 	if (memWriteEnable)
@@ -18,6 +19,7 @@ begin
 		RAM[memAddr[11:2]] = memWriteData;
 	end
 end
+
 always @(posedge clk)
 begin
 	if(memWriteEnable)

@@ -1,3 +1,4 @@
+`include "Defines.v"
 module ProgramCounter (
 	input							clk,
 	output	[31:0]		pcReadData,
@@ -17,9 +18,9 @@ begin
 	if (pcWriteEnable)
 	begin
 		case (pcOp)
-			0: PC <= PC + 4;
-			1: PC <= PC + pcWriteData;
-			2: PC <= pcWriteData;
+			`PCAdd4:		PC	<=	PC + 4;
+			`PCAddImm:	PC	<=	PC + pcWriteData;
+			`PCSetImm:	PC	<=	pcWriteData;
 		endcase
 	end
 end

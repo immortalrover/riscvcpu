@@ -6,7 +6,7 @@ module InstrMem_tb();
   initial begin
     $readmemh("tb/riscv32_sim1.dat", instr.RAM);
 		$dumpfile("build/test.vcd");
-		$dumpvars(0, InstrMem_tb);
+		$dumpvars;
     PC = 0;
   end
   always #50 PC = PC + 4;

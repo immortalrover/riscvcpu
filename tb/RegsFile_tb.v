@@ -22,13 +22,18 @@ module RegsFile_tb;
 		regsWriteEnable = 0;
 		regWriteNum = 1;
 		regWriteData = 1;
+		i	=	0;
 	end
 	always #50 clk = ~clk;
-	always #500 regsWriteEnable = ~regsWriteEnable;
-	always #300 if(regWriteNum < 31)regWriteNum = regWriteNum+1; 
 	always #100 regWriteData = regWriteData + 1;
+	always #300 if(regWriteNum < 31)regWriteNum = regWriteNum+1; 
+	always #500 regsWriteEnable = ~regsWriteEnable;
 	always #1000 regNum1 = regNum1 + 1;
-
+	always begin
+		i = i + 1;
+		#500
+		if (i == 50) $stop;
+	end
 	RegsFile regs(clk, regNum0, regNum1, regReadData0, regReadData1, regsWriteEnable, regWriteNum, regWriteData);
 
 endmodule

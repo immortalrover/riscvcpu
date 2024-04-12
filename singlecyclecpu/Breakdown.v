@@ -1,8 +1,9 @@
+`include "Defines.v"
 module Breakdown (
-	input							clk,
-	input							reset,
-	input		[31:0]		instr,
-	output	[31:0]		pcReadData
+	input											clk,
+	input											reset,
+	input		[`InstrWidth-1:0]	instr, // InstrWidth = 32
+	output	[`AddrWidth-1:0]	pcReadData // AddrWidth = 32
 );
 
 wire	[6:0]		opcode			= instr[6:0];
@@ -43,5 +44,4 @@ begin
 end
 
 Decode ID(clk, reset, opcode, func3, func7, regWriteNum, regNum0, regNum1, imm, pcReadData);
-/* assign immGen = imm; */
 endmodule;

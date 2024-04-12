@@ -1,17 +1,18 @@
+`include "Defines.v"
 module RegsFile(
-  input           clk,
-	input						reset,
-  input  [4:0]  	regNum0,
-  input  [4:0]  	regNum1,
-  output [31:0]   regReadData0,
-  output [31:0]   regReadData1,
+  input										clk,
+	input										reset,
+  input  [4:0]						regNum0,
+  input  [4:0]						regNum1,
+  output [`DataWidth-1:0] regReadData0, // DataWidth = 32
+  output [`DataWidth-1:0] regReadData1,
 
-  input           regsWriteEnable, // 1 => WRITE, Default Read
-  input  [4:0]  	regWriteNum,
-  input  [31:0]   regWriteData
+  input										regsWriteEnable, // 1 => WRITE
+  input  [4:0]						regWriteNum,
+  input  [`DataWidth-1:0]	regWriteData
 );
 
-reg [31:0] regs[31:0];
+reg [`DataWidth-1:0] regs[31:0];
 
 integer i;
 

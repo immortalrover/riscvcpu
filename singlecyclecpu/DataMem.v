@@ -1,16 +1,15 @@
+`include "Defines.v"
 module DataMem(
-	input							clk,
-  input		[31:0]		memAddr, 
-	input							memReadEnable, // 1 => Read
-  output	[31:0]		memReadData,
-	input							memWriteEnable, // 1 => Write
-  input		[31:0]		memWriteData, 
-	input		[31:0]		pcReadData
+	input											clk,
+  input		[`AddrWidth-1:0]	memAddr, // AddrWidth = 32
+	input											memReadEnable, // 1 => Read
+  output	[`DataWidth-1:0]	memReadData, // DataWidth = 32
+	input											memWriteEnable, // 1 => Write
+  input		[`DataWidth-1:0]	memWriteData, 
+	input		[`AddrWidth-1:0]	pcReadData // AddrWidth = 32
 );
 
-reg  [31:0] RAM[0:1023];
-
-assign memReadData = memReadEnable ? RAM[memAddr[11:2]] : 0; 
+reg  [`DataWidth-1:0] RAM[0:1023];
 
 always @(*)
 begin
@@ -32,4 +31,6 @@ begin
 		/******************************************************************************************************/
 	end
 end
+
+assign memReadData = memReadEnable ? RAM[memAddr[11:2]] : 0; 
 endmodule

@@ -1,9 +1,9 @@
 `include "Defines.v"
 module ALU (
-  input         [3:0]   aluOp,
-  input         [31:0]  aluX,
-  input         [31:0]  aluY,
-  output reg    [31:0]  aluO
+  input       [3:0]							aluOp,
+  input       [`DataWidth-1:0]  aluX, // DataWidth = 32
+  input       [`DataWidth-1:0]  aluY,
+  output	reg	[`DataWidth-1:0]  aluO
 );
 
 always @(*)

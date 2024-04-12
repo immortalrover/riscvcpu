@@ -55,3 +55,7 @@
 -   CPU：最终成品
 
 如果ProgramCounter tb/ProgramCounter_tb.v写到最后
+
+## 完整流程
+
+CPU(调度模块，一个完全没有什么用的顶层模块) => InstrMem(取出指令) => Breakdown(分解指令) => Decode(分配对应指令的行为) => RegsFile(可选的，取寄存器里面的值) => ALU(计算) => Controller(控制CPU的状态) => DataMem(可选的，结果写进内存) => ProgramCounter(写入PC)

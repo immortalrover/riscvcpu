@@ -1,39 +1,39 @@
 `include "Defines.v"
 module Decode (
-	input						clk,
-	input						reset,
-	input		[6:0]		opcode,
-	input		[2:0]		func3,
-	input		[6:0]		func7,
-	input		[4:0]		regWriteNum,
-	input		[4:0]		regNum0,
-	input		[4:0]		regNum1,
-	input		[31:0]	imm,
-	output	[31:0]	pcReadData
+	input											clk,
+	input											reset,
+	input		[6:0]							opcode,
+	input		[2:0]							func3,
+	input		[6:0]							func7,
+	input		[4:0]							regWriteNum,
+	input		[4:0]							regNum0,
+	input		[4:0]							regNum1,
+	input		[`DataWidth-1:0]	imm, // DataWidth = 32
+	output	[`AddrWidth-1:0]	pcReadData // AddrWidth = 32
 );
 
-wire					pcWriteEnable;
-reg		[31:0]	pcWriteData;
-reg		[2:0]		pcOp;
-ProgramCounter PC(clk, pcReadData, pcWriteEnable, pcWriteData, pcOp);
+wire										pcWriteEnable;
+reg		[`AddrWidth-1:0]	pcWriteData;
+reg		[2:0]							pcOp;
+ProgramCounter PC(clk, reset, pcReadData, pcWriteEnable, pcWriteData, pcOp);
 
 reg		[3:0]		aluOp;
-reg		[31:0]	aluX;
-reg		[31:0]	aluY;
-wire	[31:0]	aluO;
+reg		[`DataWidth-1:0]	aluX;
+reg		[`DataWidth-1:0]	aluY;
+wire	[`DataWidth-1:0]	aluO;
 ALU	alu(aluOp, aluX, aluY, aluO);
 
-wire	[31:0]	regReadData0;
-wire	[31:0]	regReadData1;
-wire					regsWriteEnable;
-reg		[31:0]	regWriteData;
+wire	[`DataWidth-1:0]	regReadData0;
+wire	[`DataWidth-1:0]	regReadData1;
+wire										regsWriteEnable;
+reg		[`DataWidth-1:0]	regWriteData;
 RegsFile RF(clk, reset,regNum0, regNum1, regReadData0, regReadData1, regsWriteEnable, regWriteNum, regWriteData);
 
-reg		[31:0]	memAddr;
-wire					memReadEnable;
-wire	[31:0]	memReadData;
-wire					memWriteEnable;
-reg		[31:0]	memWriteData;
+reg		[`AddrWidth-1:0]	memAddr;
+wire										memReadEnable;
+wire	[`DataWidth-1:0]	memReadData;
+wire										memWriteEnable;
+reg		[`DataWidth-1:0]	memWriteData;
 DataMem mem(clk, memAddr, memReadEnable, memReadData, memWriteEnable, memWriteData, pcReadData);
 
 reg		[2:0]		state;

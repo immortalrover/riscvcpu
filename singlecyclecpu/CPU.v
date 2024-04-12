@@ -1,10 +1,11 @@
+`include "Defines.v"
 module CPU (
-	input							clk,
-	input							reset,
-	output	[31:0]		pc
+	input											clk,
+	input											reset,
+	output	[`AddrWidth-1:0]	pc // AddrWidth = 32
 );
 
-wire	[31:0]	instr;
+wire	[`InstrWidth-1:0]	instr; // InstrWidth = 32
 InstrMem	instrMem(.instrAddr(pc), .instrData(instr));
 Breakdown breakdown(clk, reset, instr, pc);
 endmodule

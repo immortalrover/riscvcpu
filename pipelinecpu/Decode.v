@@ -1,47 +1,40 @@
 `include "Defines.v"
 module Decode (
-	input						clk,
-	input						reset,
-	input		[6:0]		opcode,
-	input		[2:0]		func3,
-	input		[6:0]		func7,
-	input		[4:0]		regWriteNum,
-	input		[4:0]		regNum0,
-	input		[4:0]		regNum1,
-	input		[31:0]	imm,
-	output	[31:0]	pcReadData
+	input											clk,
+	input											reset,
+	input		[6:0]							opcode,
+	input		[2:0]							func3,
+	input		[6:0]							func7,
+	input		[4:0]							regWriteNum,
+	input		[4:0]							regNum0,
+	input		[4:0]							regNum1,
+	input		[`DataWidth-1:0]	imm, // DataWidth = 32
+	output	[`AddrWidth-1:0]	pcReadData // AddrWidth = 32
 );
 
-reg		[3:0]		aluOpA;
-reg		[31:0]	aluXA;
-reg		[31:0]	aluYA;
-wire	[3:0]		aluOpB;
-wire	[31:0]	aluXB;
-wire	[31:0]	aluYB;
-DTypeFlipFlop #(4) aluOpDFF(clk, reset, aluOpA, aluOpB);
-DTypeFlipFlop aluXDFF(clk, reset, aluXA, aluXB);
-DTypeFlipFlop aluYDFF(clk, reset, aluYA, aluYB);
-wire	[31:0]	aluO;
-ALU	alu(aluOpB, aluXB, aluYB, aluO);
+wire										pcWriteEnable;
+reg		[`AddrWidth-1:0]	pcWriteData;
+reg		[2:0]							pcOp;
+ProgramCounter PC(clk, reset, pcReadData, pcWriteEnable, pcWriteData, pcOp);
 
-wire	[31:0]	regReadData0;
-wire	[31:0]	regReadData1;
-wire					regsWriteEnable;
-reg		[31:0]	regWriteDataA;
-wire	[31:0]	regWriteDataB;
-DTypeFlipFlop	regWriteDataDFF(clk, reset, regWriteDataA, regWriteDataB);
-RegsFile RF(clk, reset,regNum0, regNum1, regReadData0, regReadData1, regsWriteEnable, regWriteNum, regWriteDataB);
+reg		[3:0]		aluOp;
+reg		[`DataWidth-1:0]	aluX;
+reg		[`DataWidth-1:0]	aluY;
+wire	[`DataWidth-1:0]	aluO;
+ALU	alu(aluOp, aluX, aluY, aluO);
 
-reg		[31:0]	memAddrA;
-wire					memReadEnable;
-wire	[31:0]	memReadData;
-wire					memWriteEnable;
-reg		[31:0]	memWriteDataA;
-wire	[31:0]	memAddrB;
-wire	[31:0]	memWriteDataB;
-DTypeFlipFlop	memAddrDFF(clk, reset, memAddrA, memAddrB);
-DTypeFlipFlop	memWriteDataDFF(clk, reset, memWriteDataA, memWriteDataB);
-DataMem mem(clk, memAddrB, memReadEnable, memReadData, memWriteEnable, memWriteDataB, pcReadData);
+wire	[`DataWidth-1:0]	regReadData0;
+wire	[`DataWidth-1:0]	regReadData1;
+wire										regsWriteEnable;
+reg		[`DataWidth-1:0]	regWriteData;
+RegsFile RF(clk, reset,regNum0, regNum1, regReadData0, regReadData1, regsWriteEnable, regWriteNum, regWriteData);
+
+reg		[`AddrWidth-1:0]	memAddr;
+wire										memReadEnable;
+wire	[`DataWidth-1:0]	memReadData;
+wire										memWriteEnable;
+reg		[`DataWidth-1:0]	memWriteData;
+DataMem mem(clk, memAddr, memReadEnable, memReadData, memWriteEnable, memWriteData, pcReadData);
 
 reg		[2:0]		state;
 Controller control(state, regsWriteEnable, memReadEnable, memWriteEnable, pcWriteEnable);
@@ -49,13 +42,15 @@ Controller control(state, regsWriteEnable, memReadEnable, memWriteEnable, pcWrit
 always @(*)
 begin
 	if (reset) begin
-		aluOpA						=	`ADD;
-		aluXA							=	0;
-		aluYA							=	0;
-		regWriteDataA			=	0;
-		memAddrA					=	0;
-		memWriteDataA			=	0;
-		state							=	`IDLE;
+		aluOp						=	`ADD;
+		aluX						=	0;
+		aluY						=	0;
+		pcWriteData			=	0;
+		pcOp						=	`PCClear;
+		regWriteData		=	0;
+		memAddr					=	0;
+		memWriteData		=	0;
+		state						=	`IDLE;
 	end
 	else if (clk)
 	begin
@@ -63,39 +58,39 @@ begin
 		7'b0110011: // FMT R
 		begin
 			case (func3)
-				0: aluOpA		=	func7[5] ? `SUB : `ADD;	// add sub
-				1: aluOpA		=	`ShiftLeftUnsigned;	// sll
-				2: aluOpA		=	`LesserThanSigned;	// slt
-				3: aluOpA		=	`LesserThanUnsigned; // sltu
-				4: aluOpA		=	`XOR; // xor
-				5: aluOpA		=	func7[5] ?	`ShiftRightSigned : `ShiftRightUnsigned; // srl sra
-				6: aluOpA		=	`OR; // or
-				7: aluOpA		=	`AND; // and
+				0: aluOp		=	func7[5] ? `SUB : `ADD;	// add sub
+				1: aluOp		=	`ShiftLeftUnsigned;	// sll
+				2: aluOp		=	`LesserThanSigned;	// slt
+				3: aluOp		=	`LesserThanUnsigned; // sltu
+				4: aluOp		=	`XOR; // xor
+				5: aluOp		=	func7[5] ?	`ShiftRightSigned : `ShiftRightUnsigned; // srl sra
+				6: aluOp		=	`OR; // or
+				7: aluOp		=	`AND; // and
 			endcase
-			aluXA					=	regReadData0;
-			aluYA					=	regReadData1;
+			aluX					=	regReadData0;
+			aluY					=	regReadData1;
 
-			pcOpA					=	`PCAdd4;
-			regWriteDataA	=	aluO;
+			pcOp					=	`PCAdd4;
+			regWriteData	=	aluO;
 			state					=	`RegsWrite;
 		end
 		7'b0010011: // FMT I
 		begin
 			case (func3)
-				0: aluOpA		=	`ADD;	// addi
-				1: aluOpA		=	`ShiftLeftUnsigned;	// slli
-				2: aluOpA		=	`LesserThanSigned;	// slti
-				3: aluOpA		=	`LesserThanUnsigned; // sltiu
-				4: aluOpA		=	`XOR; // xori
-				5: aluOpA		=	imm[10] ?	`ShiftRightSigned : `ShiftRightUnsigned; // srli srai
-				6: aluOpA		=	`OR; // ori
-				7: aluOpA		=	`AND; // andi
+				0: aluOp		=	`ADD;	// addi
+				1: aluOp		=	`ShiftLeftUnsigned;	// slli
+				2: aluOp		=	`LesserThanSigned;	// slti
+				3: aluOp		=	`LesserThanUnsigned; // sltiu
+				4: aluOp		=	`XOR; // xori
+				5: aluOp		=	imm[10] ?	`ShiftRightSigned : `ShiftRightUnsigned; // srli srai
+				6: aluOp		=	`OR; // ori
+				7: aluOp		=	`AND; // andi
 			endcase
-			aluXA					=	regReadData0;
-			aluYA					=	imm;
+			aluX					=	regReadData0;
+			aluY					=	imm;
 
-			pcOpA					=	`PCAdd4;
-			regWriteDataA	=	aluO;
+			pcOp					=	`PCAdd4;
+			regWriteData	=	aluO;
 			state					=	`RegsWrite;
 		end
 		7'b0000011: // FMT I lb lh lw lbu lhu

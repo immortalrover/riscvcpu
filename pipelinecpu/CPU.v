@@ -1,17 +1,11 @@
+`include "Defines.v"
 module CPU (
-	input							clk,
-	input							reset,
-	output	[31:0]		pcReadData
+	input											clk,
+	input											reset,
+	output	[`AddrWidth-1:0]	pc // AddrWidth = 32
 );
 
-reg		[31:0]	pcWriteData;
-reg		[2:0]		pcOp;
-ProgramCounter PC(clk, reset,	pcReadData, pcWriteData, pcOp);
-
-wire	[31:0]	instrA;
-InstrMem	instrMem(.instrAddr(pcReadData), .instrData(instrA));
-wire	[31:0]	instrB;
-DTypeFlipFlop	instrDFF(clk, reset, instrA, instrB);
-
-Breakdown breakdown(clk, reset, instrB, pc);
+wire	[`InstrWidth-1:0]	instr; // InstrWidth = 32
+InstrMem	instrMem(.instrAddr(pc), .instrData(instr));
+Breakdown breakdown(clk, reset, instr, pc);
 endmodule

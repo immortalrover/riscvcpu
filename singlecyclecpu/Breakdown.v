@@ -3,22 +3,21 @@ module Breakdown (
 	input											clk,
 	input											reset,
 	input		[`InstrWidth-1:0]	instr, // InstrWidth = 32
-	output	[`AddrWidth-1:0]	pcReadData // AddrWidth = 32
+	input		[`AddrWidth-1:0]	pcReadData, // AddrWidth = 32
+	output										pcWriteEnable, // 1 <= WRITE
+	output	[`DataWidth-1:0]	pcWriteData, // DataWidth = 32
+	output	[2:0]							pcOp
 );
 
-wire	[6:0]		opcode			= instr[6:0];
-wire	[2:0]		func3				= instr[14:12];
-wire	[6:0]		func7				= instr[31:25];
+wire	[6:0]							opcode			= instr[6:0];
+wire	[2:0]							func3				= instr[14:12];
+wire	[6:0]							func7				= instr[31:25];
+wire	[4:0]							regWriteNum	= instr[11:7];
+wire	[4:0]							regNum0			= instr[19:15];
+wire	[4:0]							regNum1			= instr[24:20];
 
-wire	[4:0]		regWriteNum	= instr[11:7];
-wire	[4:0]		regNum0			= instr[19:15];
-wire	[4:0]		regNum1			= instr[24:20];
-
-reg		[31:0]	imm;
-
-initial begin
-	imm = 0;
-end
+reg		[`DataWidth-1:0]	imm;
+initial imm = 0;
 
 always @(*)
 begin
@@ -43,5 +42,5 @@ begin
 	endcase
 end
 
-Decode ID(clk, reset, opcode, func3, func7, regWriteNum, regNum0, regNum1, imm, pcReadData);
+Decode ID(clk, reset, opcode, func3, func7, regWriteNum, regNum0, regNum1, imm, pcReadData, pcWriteEnable, pcWriteData, pcOp);
 endmodule;

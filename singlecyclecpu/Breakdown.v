@@ -4,7 +4,6 @@ module Breakdown (
 	input											reset,
 	input		[`InstrWidth-1:0]	instr, // InstrWidth = 32
 	input		[`AddrWidth-1:0]	pcReadData, // AddrWidth = 32
-	output										pcWriteEnable, // 1 <= WRITE
 	output	[`DataWidth-1:0]	pcWriteData, // DataWidth = 32
 	output	[2:0]							pcOp
 );
@@ -42,5 +41,5 @@ begin
 	endcase
 end
 
-Decode ID(clk, reset, opcode, func3, func7, regWriteNum, regNum0, regNum1, imm, pcReadData, pcWriteEnable, pcWriteData, pcOp);
+Decode ID(clk, reset, opcode, func3, func7, regWriteNum, regNum0, regNum1, imm, pcReadData, pcWriteData, pcOp);
 endmodule;

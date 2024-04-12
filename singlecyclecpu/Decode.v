@@ -10,7 +10,6 @@ module Decode (
 	input				[4:0]							regNum1,
 	input				[`DataWidth-1:0]	imm, // DataWidth = 32
 	input				[`AddrWidth-1:0]	pcReadData, // AddrWidth = 32
-	output												pcWriteEnable, // 1 <= WRITE
 	output	reg	[`DataWidth-1:0]	pcWriteData,
 	output	reg [2:0]							pcOp
 );
@@ -35,7 +34,12 @@ reg		[`DataWidth-1:0]	memWriteData;
 DataMem mem(clk, memAddr, memReadEnable, memReadData, memWriteEnable, memWriteData, pcReadData);
 
 reg		[2:0]		state;
-Controller control(state, regsWriteEnable, memReadEnable, memWriteEnable, pcWriteEnable);
+Controller control(state, regsWriteEnable, memReadEnable, memWriteEnable);
+
+initial begin
+	pcWriteData = 0;
+	pcOp = `PCClear;
+end
 
 always @(*)
 begin

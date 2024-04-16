@@ -13,7 +13,6 @@ initial begin
 	$dumpfile("build/test.vcd");
 	$dumpvars;
   $readmemh("tb/riscv32_sim2.dat", cpu.instrMem.RAM);
-  $readmemh("tb/riscv32_sim2.dat", cpu.breakdown.ID.mem.RAM);
   clk = 0;
 end
 

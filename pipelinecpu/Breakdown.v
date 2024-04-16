@@ -24,7 +24,7 @@ RegsFile RF(
   regsWriteEnable, regWriteNum, regWriteData
 );
 
-reg [`DataWidth-1:0]	immData;
+reg		[`DataWidth-1:0]	immData;
 initial immData = 0;
 always @(*)
 begin
@@ -47,6 +47,9 @@ begin
 		default:
 			immData = 32'bz;
 	endcase
+	imm[2*`DataWidth-1:`DataWidth]					= immData;	// Here is correct.
+	regOutData0[2*`DataWidth-1:`DataWidth]	= regReadData0;
+	regOutData1[2*`DataWidth-1:`DataWidth]	= regReadData1;
 end
 
 reg		[2*`DataWidth-1:0]	imm;
@@ -59,17 +62,17 @@ initial begin
 end
 always @(posedge clk)
 begin
-	imm [2*`DataWidth-1:`DataWidth]	<= immData;
-	imm [`DataWidth-1:0]						<= imm [2*`DataWidth-1:`DataWidth];
-	regOutData0 [2*`DataWidth-1:`DataWidth]	<= regReadData0;
-	regOutData0	[`DataWidth-1:0]						<= regOutData0 [2*`DataWidth-1:`DataWidth];	
-	regOutData1 [2*`DataWidth-1:`DataWidth]	<= regReadData1;
-	regOutData1	[`DataWidth-1:0]						<= regOutData1 [2*`DataWidth-1:`DataWidth];	
+	/* imm[2*`DataWidth-1:`DataWidth]	<= immData; */ // Bug!
+	imm[`DataWidth-1:0]							<= imm[2*`DataWidth-1:`DataWidth];
+	/* regOutData0[2*`DataWidth-1:`DataWidth]	<= regReadData0; */
+	regOutData0[`DataWidth-1:0]							<= regOutData0[2*`DataWidth-1:`DataWidth];	
+	/* regOutData1[2*`DataWidth-1:`DataWidth]	<= regReadData1; */
+	regOutData1[`DataWidth-1:0]							<= regOutData1[2*`DataWidth-1:`DataWidth];	
 end
 
 Decode ID(
 	clk, reset, opcode, func3, func7, 
-	regOutData0 [`DataWidth-1:0], regOutData1[`DataWidth-1:0], regsWriteEnable, regWriteData, imm [`DataWidth-1:0], 
-	pcReadData, pcWriteData, pcOp
+	regOutData0[`DataWidth-1:0], regOutData1[`DataWidth-1:0], regsWriteEnable, regWriteData, 
+	imm[`DataWidth-1:0], pcReadData, pcWriteData, pcOp
 );
 endmodule;

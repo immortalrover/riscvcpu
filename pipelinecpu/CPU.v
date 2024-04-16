@@ -5,7 +5,7 @@ module CPU (
 	output	[`AddrWidth-1:0]	pcReadData // AddrWidth = 32
 );
 
-reg		[`AddrWidth-1:0] PC; // get PC
+reg		[`AddrWidth-1:0]	PC; // get PC
 initial PC = 0;
 always @(*) if (reset) PC = 0;
 
@@ -14,7 +14,7 @@ InstrMem	instrMem(.instrAddr(pcReadData), .instrData(instrData));
 
 wire	[`AddrWidth-1:0]	pcWriteData;
 wire	[2:0]							pcOp;
-reg	[2*`InstrWidth-1:0]	instr;
+reg		[2*`InstrWidth-1:0]	instr;
 Breakdown breakdown(clk, reset, instr[`InstrWidth-1:0], pcReadData, pcWriteData, pcOp);
 
 always @(posedge clk)
@@ -25,8 +25,8 @@ begin
 		`PCAddImm:	PC	<=	PC + pcWriteData;
 		`PCSetImm:	PC	<=	pcWriteData;
 	endcase
-	instr	[2*`InstrWidth-1:`InstrWidth] <= instrData;
-	instr	[`InstrWidth-1:0]							<= instr[2*`InstrWidth-1:`InstrWidth];
+	instr[2*`InstrWidth-1:`InstrWidth]	<= instrData;
+	instr[`InstrWidth-1:0]							<= instr[2*`InstrWidth-1:`InstrWidth];
 end
 
 assign pcReadData = PC;

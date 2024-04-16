@@ -5,10 +5,11 @@ module Decode (
 	input				[6:0]							opcode,
 	input				[2:0]							func3,
 	input				[6:0]							func7,
-	input				[4:0]							regWriteNum,
-	input				[4:0]							regNum0,
-	input				[4:0]							regNum1,
-	input				[`DataWidth-1:0]	imm, // DataWidth = 32
+	input				[`DataWidth-1:0]	regReadData0, // DataWidth = 32
+	input				[`DataWidth-1:0]	regReadData1,
+	output												regsWriteEnable,
+	output	reg	[`DataWidth-1:0]	regWriteData,
+	input				[`DataWidth-1:0]	imm,
 	input				[`AddrWidth-1:0]	pcReadData, // AddrWidth = 32
 	output	reg	[`DataWidth-1:0]	pcWriteData,
 	output	reg [2:0]							pcOp
@@ -20,18 +21,17 @@ reg		[`DataWidth-1:0]	aluY;
 wire	[`DataWidth-1:0]	aluO;
 ALU	alu(aluOp, aluX, aluY, aluO);
 
-wire	[`DataWidth-1:0]	regReadData0;
-wire	[`DataWidth-1:0]	regReadData1;
-wire										regsWriteEnable;
-reg		[`DataWidth-1:0]	regWriteData;
-RegsFile RF(clk, reset,regNum0, regNum1, regReadData0, regReadData1, regsWriteEnable, regWriteNum, regWriteData);
-
 reg		[`AddrWidth-1:0]	memAddr; // AddrWidth = 32
 wire										memReadEnable;
 wire	[`DataWidth-1:0]	memReadData;
 wire										memWriteEnable;
 reg		[`DataWidth-1:0]	memWriteData;
-DataMem mem(clk, memAddr, memReadEnable, memReadData, memWriteEnable, memWriteData, pcReadData);
+DataMem mem(
+	clk, memAddr, 
+	memReadEnable, memReadData, 
+	memWriteEnable, memWriteData, 
+	pcReadData
+);
 
 reg		[2:0]		state;
 Controller control(state, regsWriteEnable, memReadEnable, memWriteEnable);

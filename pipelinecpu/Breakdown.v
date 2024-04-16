@@ -15,6 +15,15 @@ wire	[4:0]							regWriteNum	= instr[11:7];
 wire	[4:0]							regNum0			= instr[19:15];
 wire	[4:0]							regNum1			= instr[24:20];
 
+wire  [`DataWidth-1:0]  regReadData0;
+wire  [`DataWidth-1:0]  regReadData1;
+wire                    regsWriteEnable;
+wire  [`DataWidth-1:0]  regWriteData;
+RegsFile RF( 
+  clk, reset,regNum0, regNum1, regReadData0, regReadData1, 
+  regsWriteEnable, regWriteNum, regWriteData
+);
+
 reg [`DataWidth-1:0]	immData;
 initial immData = 0;
 always @(*)
@@ -41,16 +50,26 @@ begin
 end
 
 reg		[2*`DataWidth-1:0]	imm;
-initial imm = 0;
+reg		[2*`DataWidth-1:0]	regOutData0;
+reg		[2*`DataWidth-1:0]	regOutData1;
+initial begin
+	imm = 0;
+	regOutData0 = 0;
+	regOutData1	=	0;
+end
 always @(posedge clk)
 begin
 	imm [2*`DataWidth-1:`DataWidth]	<= immData;
 	imm [`DataWidth-1:0]						<= imm [2*`DataWidth-1:`DataWidth];
+	regOutData0 [2*`DataWidth-1:`DataWidth]	<= regReadData0;
+	regOutData0	[`DataWidth-1:0]						<= regOutData0 [2*`DataWidth-1:`DataWidth];	
+	regOutData1 [2*`DataWidth-1:`DataWidth]	<= regReadData1;
+	regOutData1	[`DataWidth-1:0]						<= regOutData1 [2*`DataWidth-1:`DataWidth];	
 end
 
 Decode ID(
 	clk, reset, opcode, func3, func7, 
-	regWriteNum, regNum0, regNum1, imm [`DataWidth-1:0], 
+	regOutData0 [`DataWidth-1:0], regOutData1[`DataWidth-1:0], regsWriteEnable, regWriteData, imm [`DataWidth-1:0], 
 	pcReadData, pcWriteData, pcOp
 );
 endmodule;

@@ -44,8 +44,8 @@ reg		[2*`DataWidth-1:0]	imm;
 initial imm = 0;
 always @(posedge clk)
 begin
-	imm [2*`DataWidth-1:0]	<= immData;
-	imm [`DataWidth-1:0]		<= imm [2*`DataWidth-1:`DataWidth];
+	imm [2*`DataWidth-1:`DataWidth]	<= immData;
+	imm [`DataWidth-1:0]						<= imm [2*`DataWidth-1:`DataWidth];
 end
 
 Decode ID(

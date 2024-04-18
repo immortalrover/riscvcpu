@@ -2,6 +2,13 @@
 `define InstrWidth										32
 `define AddrWidth											32
 `define DataWidth											32
+`define OpcodeWidth										7
+`define Func3Width										3
+`define Func7Width										7
+`define RegNumWidth										5
+`define ALUOpWidth										4
+`define DataSelectWidth								3
+`define StateWidth										3
 
 // PC
 `define PCClear												3'h0

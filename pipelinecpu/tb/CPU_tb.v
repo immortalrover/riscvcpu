@@ -23,7 +23,7 @@ always begin
    begin
       counter = counter + 1;
       //comment out all display line(s) for online judge
-      if (pc == 32'h00000030) // set to the address of the last instruction
+      if (pc == 32'h00000100) // set to the address of the last instruction
        begin
 
          $stop;

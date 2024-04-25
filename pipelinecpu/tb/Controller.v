@@ -9,8 +9,8 @@ module Controller (
 	input				[`DataWidth-1:0]		aluO,
 	input				[`DataWidth-1:0]		pcReadData,
 
-	output	reg											regWriteEnable,
-	output	reg	[`DataWidth-1:0]		regWriteData,
+	output													regWriteEnable,
+	output			[`DataWidth-1:0]		regWriteData,
 
 	output			[`AddrWidth-1:0]		memReadAddr, // AddrWidth = 32
 	output			[`AddrWidth-1:0]		memWriteAddr, // AddrWidth = 32
@@ -22,6 +22,8 @@ module Controller (
 	output	reg	[`DataWidth-1:0]		pcWriteData
 );
 
+reg										regInEnable[1:0];
+reg	[`DataWidth-1:0]	regInData[1:0];
 reg										memInEnable[1:0];
 reg [`DataWidth-1:0]	memInData[1:0];
 reg	[`AddrWidth-1:0]	memAddr[1:0];
@@ -38,19 +40,19 @@ begin
 		/* end */
 		`RegWrite:
 		begin
-			regWriteData		= aluO;
-			regWriteEnable	=	1;
+			regInData[1]		= aluO;
+			regInEnable[1]	=	1;
 			pcOp						= `PCAdd4;
 		end	
 		`MemReadRegWrite:
 		begin
 			memAddr[0]			= aluO;
       case (func3)
-        0: regWriteData = { { 24{ memReadData[7] } }, memReadData[7:0] }; // lb lbu
-        1: regWriteData = { { 16{ memReadData[15] } }, memReadData[15:0] }; // lh lhu
-        2: regWriteData = memReadData; // lw
+        0: regInData[1] = { { 24{ memReadData[7] } }, memReadData[7:0] }; // lb lbu
+        1: regInData[1] = { { 16{ memReadData[15] } }, memReadData[15:0] }; // lh lhu
+        2: regInData[1] = memReadData; // lw
       endcase
-			regWriteEnable	=	1;
+			regInEnable[1]	=	1;
 			pcOp						= `PCAdd4;
 		end
 		`MemWrite:
@@ -73,19 +75,22 @@ begin
 		begin
 			pcOp						=	`PCSetImm;
 			pcWriteData			=	aluO;
-			regWriteData		=	pcReadData;
-			regWriteEnable	=	1;
+			regInData[1]		=	pcReadData;
 		end
 	endcase
 end
 
 always @(posedge clk)
 begin
+	regInEnable[0] <= regInEnable[1];
+	regInData[0] <= regInData[1];
 	memInEnable[0] <= memInEnable[1];
 	memInData[0] <= memInData[1];
 	memAddr[0] <= memAddr[1];
 end
 
+assign regWriteEnable = regInEnable[0];
+assign regWriteData = regInData[0];
 assign memWriteData = memInData[0];
 assign memReadAddr = memAddr[1];
 assign memWriteAddr = memAddr[0];

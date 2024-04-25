@@ -6,7 +6,7 @@ module Execute (
 	input				[`Func3Width-1:0]		func3, // Func3Width = 3
 	input				[`Func7Width-1:0]		func7, // Func7Width = 7
 	input				[`DataWidth-1:0]		regReadData0, // DataWidth = 32
-	input				[`DataWidth-1:0]		regReadData1a, regReadData1b,
+	input				[`DataWidth-1:0]		regReadData1,
 	output													regWriteEnable,
 	output			[`DataWidth-1:0]		regWriteData,
 	input				[`DataWidth-1:0]		imm,
@@ -14,6 +14,8 @@ module Execute (
 	output			[`DataWidth-1:0]		pcWriteData,
 	output			[`PCOpWidth-1:0]		pcOp // PCOpWidth = 2
 );
+
+reg		[`DataWidth-1:0]		regOutData1[1:0];
 
 reg		[`ALUOpWidth-1:0]		aluOp[1:0]; // ALUOpWidth = 5
 reg		[`DataWidth-1:0]		aluX[1:0];
@@ -32,7 +34,7 @@ wire	[`DataWidth-1:0]		memInData;
 reg		[`DataWidth-1:0]		memWriteData[1:0]; // pipe?
 Controller control(
 	clk, state[0], 
-	func3Data[0], immData[0], regReadData1b, aluO, pcReadData,
+	func3Data[0], immData[0], regOutData1[0], aluO, pcReadData,
 	regWriteEnable, regWriteData,
 	memReadAddr, memWriteAddr,memReadData, memWriteEnable, memInData,
 	pcOp, pcWriteData
@@ -70,7 +72,7 @@ begin
 				7: aluOp[1] = `AND; // and
 			endcase
 			aluX[1] = regReadData0;
-			aluY[1] = regReadData1a;
+			aluY[1] = regOutData1[1];
 			state[1] = `RegWrite;
 		end
 		7'b0010011: // FMT I
@@ -114,7 +116,7 @@ begin
 				7: aluOp[1] = `GreaterThanOrEqualUnsigned; // bgeu
 			endcase
 			aluX[1] = regReadData0;
-			aluY[1] = regReadData1a;
+			aluY[1] = regOutData1[1];
 			state[1] = `PCSelectWrite;
 		end
 		7'b1101111: // FMT J jal
@@ -149,6 +151,7 @@ begin
 	end
 	immData[1] = imm;
 	func3Data[1] = func3;
+	regOutData1[1] = regReadData1;
 end
 
 always @(posedge clk)
@@ -160,5 +163,6 @@ begin
 	immData[0] <= immData[1];
 	memWriteData[0] <= memWriteData[1];
 	func3Data[0] <= func3Data[1];
+	regOutData1[0] <= regOutData1[1];
 end
 endmodule

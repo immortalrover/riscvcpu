@@ -2,15 +2,14 @@
 module DataMem(
 	input											clk,
   input		[`AddrWidth-1:0]	memReadAddr, // AddrWidth = 32
-	input											memReadEnable, // 1 => Read
+  input		[`AddrWidth-1:0]	memWriteAddr, // AddrWidth = 32
   output	[`DataWidth-1:0]	memReadData, // DataWidth = 32
-  input		[`AddrWidth-1:0]	memWriteAddr,
 	input											memWriteEnable, // 1 => Write
   input		[`DataWidth-1:0]	memWriteData, 
 	input		[`AddrWidth-1:0]	pcReadData // AddrWidth = 32
 );
 
-reg  [`DataWidth-1:0] RAM[0:1023];
+reg  [`DataWidth-1:0] RAM[1023:0];
 
 always @(*)
 begin
@@ -33,5 +32,5 @@ begin
 	end
 end
 
-assign memReadData = memReadEnable ? RAM[memReadAddr[11:2]] : 0; 
+assign memReadData = RAM[memReadAddr[11:2]]; 
 endmodule

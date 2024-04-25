@@ -1,5 +1,5 @@
 `include "Defines.v"
-module RegsFile(
+module regFile(
   input										clk,
 	input										reset,
   input  [4:0]						regNum0,
@@ -7,16 +7,16 @@ module RegsFile(
   output [`DataWidth-1:0] regReadData0, // DataWidth = 32
   output [`DataWidth-1:0] regReadData1,
 
-  input										regsWriteEnable, // 1 => WRITE
+  input										regWriteEnable, // 1 => WRITE
   input  [4:0]						regWriteNum,
   input  [`DataWidth-1:0]	regWriteData
 );
 
-reg [`DataWidth-1:0] regs[31:0];
+reg [`DataWidth-1:0] reg[31:0];
 
 integer i;
-initial for ( i = 0; i < 32; i=i+1) regs[i] = 0;
-always @(*) if (reset) for ( i = 0; i < 32; i=i+1) regs[i] = 0;
+initial for ( i = 0; i < 32; i=i+1) reg[i] = 0;
+always @(*) if (reset) for ( i = 0; i < 32; i=i+1) reg[i] = 0;
 
 // three ported register file
 // read two ports combinationally
@@ -25,9 +25,9 @@ always @(*) if (reset) for ( i = 0; i < 32; i=i+1) regs[i] = 0;
 
 always @(negedge clk)
 begin
-  if (regsWriteEnable && regWriteNum != 0)
+  if (regWriteEnable && regWriteNum != 0)
   begin
-    regs[regWriteNum] <= regWriteData;
+    reg[regWriteNum] <= regWriteData;
     // DO NOT CHANGE THIS display LINE!!!
     // 不要修改下面这行display语句！！！
     /**********************************************************************/
@@ -36,6 +36,6 @@ begin
   end
 end
 
-assign regReadData0 = (regNum0 != 0) ? regs[regNum0] : 0;
-assign regReadData1 = (regNum1 != 0) ? regs[regNum1] : 0;
+assign regReadData0 = (regNum0 != 0) ? reg[regNum0] : 0;
+assign regReadData1 = (regNum1 != 0) ? reg[regNum1] : 0;
 endmodule

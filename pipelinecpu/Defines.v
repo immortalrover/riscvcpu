@@ -7,21 +7,22 @@
 `define Func7Width										7
 `define RegNumWidth										5
 `define ALUOpWidth										4
-`define DataSelectWidth								3
 `define StateWidth										3
+`define PCOpWidth											2
 
 // PC
-`define PCClear												3'h0
-`define PCAdd4												3'h1
-`define PCAddImm											3'h2
-`define PCSetImm											3'h3
+`define PCClear												0
+`define PCAdd4												1
+`define PCAddImm											2
+`define PCSetImm											3
 
 // States
-`define IDLE													3'h0
-`define RegsWrite											3'h1
-`define MemtoRegs											3'h2
-`define MemWrite											3'h3
-`define PCWrite												3'h4
+`define IDLE													0
+`define RegWrite											1
+`define MemReadRegWrite								2
+`define MemWrite											3
+`define PCSelectWrite									4
+`define	PCWrite												5
 
 // ALU operation
 `define ADD														4'h0

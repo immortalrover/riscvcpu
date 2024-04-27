@@ -3,9 +3,10 @@ module Decode (
 	input											clk,
 	input											reset,
 	input		[`InstrWidth-1:0]	instr, // InstrWidth = 32
-	input		[`AddrWidth-1:0]	pcReadData, // AddrWidth = 32
+	input		[`AddrWidth-1:0]	PC, // AddrWidth = 32
 	output	[`DataWidth-1:0]	pcWriteData, // DataWidth = 32
-	output	[`PCOpWidth-1:0]	pcOp // PCOpWidth = 2
+	output										pcWriteEnable,
+	output										hazard
 );
 
 reg		[`OpcodeWidth-1:0]		opcode[1:0]; /* = instr[6:0]; */ // OpcodeWidth = 7
@@ -26,6 +27,9 @@ reg		[`DataWidth-1:0]			regOutData1[1:0];
 wire	[`DataWidth-1:0]			aluO1;
 wire forwardA1, forwardA2, forwardB1, forwardB2;
 wire forward1 = forwardA1 | forwardB1;
+
+wire	[1:0]									forwardA = {forwardA1, forwardA2};
+wire	[1:0]									forwardB = {forwardB1, forwardB2};
 
 always @(*)
 begin
@@ -52,23 +56,47 @@ begin
 	func3[1] = instr[14:12];
 	func7[1] = instr[31:25];
 	regWriteNum[3] = instr[11:7];
-	regOutData0[1] = forwardA1 ? aluO1 : forwardA2 ? regInData[1] : regReadData0;
-	regOutData1[1] = forwardB1 ? aluO1 : forwardB2 ? regInData[1] : regReadData1;
+	case (forwardA)
+		2'b00:
+			regOutData0[1] = regReadData0;
+		2'b10, 2'b11:
+			regOutData0[1] = aluO1;
+		2'b01:
+			regOutData0[1] = regWriteData;
+		default:
+			regOutData0[1] = regReadData0;
+	endcase
+	case (forwardB)
+		2'b00:
+			regOutData1[1] = regReadData1;
+		2'b10, 2'b11:
+			regOutData1[1] = aluO1;
+		2'b01:
+			regOutData1[1] = regWriteData;
+		default:
+			regOutData1[1] = regReadData1;
+	endcase
+	/* regOutData0[1] = forwardA1 ? aluO1 : forwardA2 ? regInData[1] : regReadData0; */
+	/* regOutData1[1] = forwardB1 ? aluO1 : forwardB2 ? regInData[1] : regReadData1; */
 	regInData[1] = regWriteData;
 	regInEnable[1] = regWriteEnable;
 end
 
 always @(posedge clk)
 begin
-	opcode[0] <= opcode[1];
-	func3[0] <= func3[1];
-	func7[0] <= func7[1];
-	regWriteNum[2] <= regWriteNum[3];
+	if(~hazard)
+	begin
+		opcode[0] <= opcode[1];
+		func3[0] <= func3[1];
+		func7[0] <= func7[1];
+		imm[0] <= imm[1];
+		regOutData0[0] <= regOutData0[1];	
+		regOutData1[0] <= regOutData1[1];	
+		regWriteNum[2] <= regWriteNum[3];
+	end
+	else regWriteNum[2] <= 0;
 	regWriteNum[1] <= regWriteNum[2];
 	regWriteNum[0] <= regWriteNum[1];
-	imm[0] <= imm[1];
-	regOutData0[0] <= regOutData0[1];	
-	regOutData1[0] <= regOutData1[1];	
 	regInData[0] <= regInData[1];
 	regInEnable[0] <= regInEnable[1];
 end
@@ -78,6 +106,10 @@ wire [`DataWidth-1:0] testa2 = regOutData0[0];
 wire [`DataWidth-1:0] testb1 = regOutData1[1];
 wire [`DataWidth-1:0] testb2 = regOutData1[0];
 
+wire [`RegNumWidth-1:0] testr1 = regWriteNum[1];
+wire [`RegNumWidth-1:0] testr2 = regWriteNum[2];
+wire [`RegNumWidth-1:0] testr3 = regWriteNum[3];
+
 RegsFile RF( 
   clk, reset, regNum0, regNum1, regReadData0, regReadData1, 
   regInEnable[0], regWriteNum[0], regInData[0]
@@ -86,11 +118,12 @@ RegsFile RF(
 Execute EX(
 	clk, reset, opcode[0], func3[0],func7[0], 
 	regOutData0[0], regOutData1[0], regWriteEnable, regWriteData, 
-	imm[0], pcReadData, pcWriteData, pcOp, forward1, aluO1
+	imm[0], PC, pcWriteData, pcWriteEnable, forward1, aluO1, hazard
 );
 
 Forward Forwarding(
 	clk, regNum0, regNum1, regWriteNum[2], forwardA1, forwardA2, forwardB1, forwardB2
 );
 
+Hazard hazarding(clk, forward1, opcode[0], hazard);
 endmodule

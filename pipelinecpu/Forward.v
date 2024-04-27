@@ -10,6 +10,10 @@ module Forward (
 	output											forwardB2
 );
 reg [`RegNumWidth-1:0] regsWriteNum[1:0];
+initial begin
+	regsWriteNum[1] = -1;
+	regsWriteNum[0] = -1;
+end
 
 always @(*)
 begin

@@ -8,23 +8,32 @@ module Controller (
 	input				[`DataWidth-1:0]		imm, // DataWidth = 32
 	input				[`DataWidth-1:0]		regReadData1,
 	input				[`DataWidth-1:0]		aluO,
-	input				[`DataWidth-1:0]		pcReadData,
+	input				[`DataWidth-1:0]		PC,
 
 	output	reg											regWriteEnable,
 	output	reg	[`DataWidth-1:0]		regWriteData,
 
-	output	reg	[`AddrWidth-1:0]		memAddr, // AddrWidth = 32
-	input				[`DataWidth-1:0]		memReadData,
-	output	reg											memWriteEnable,
-	output	reg	[`DataWidth-1:0]		memWriteData,
+	/* output	reg	[`AddrWidth-1:0]		memAddr, // AddrWidth = 32 */
+	/* input				[`DataWidth-1:0]		memReadData, */
+	/* output	reg											memWriteEnable, */
+	/* output	reg	[`DataWidth-1:0]		memWriteData, */
 
-	output	reg	[`PCOpWidth-1:0]		pcOp, // PCOpWidth = 2
+	output	reg											pcWriteEnable,
 	output	reg	[`DataWidth-1:0]		pcWriteData
 );
 
+reg	[`AddrWidth-1:0]		memAddr;
+wire	[`DataWidth-1:0]		memReadData;
+reg											memWriteEnable;
+reg	[`DataWidth-1:0]		memWriteData;
+/* reg		[`AddrWidth-1:0]		memWriteAddr; // AddrWidth = 32 */
 always @(*) 
 begin
-	if (reset) pcOp			= `PCClear;
+	if (reset) 
+	begin
+		pcWriteEnable			= 1;
+		pcWriteData				= 0;
+	end
 	else 
 	case (state)
 		`IDLE:
@@ -33,15 +42,15 @@ begin
 			regWriteEnable	=	0;
 			memWriteEnable	=	0;
 			memWriteData		=	0;
-			pcOp						= `PCAdd4;
+			pcWriteEnable		= 0;
 		end
 		`RegWrite:
 		begin
 			regWriteData		= aluO;
 			regWriteEnable	=	1;
-			pcOp						= `PCAdd4;
 			memWriteEnable	=	0;
 			memWriteData		=	0;
+			pcWriteEnable		= 0;
 		end	
 		`MemReadRegWrite:
 		begin
@@ -52,9 +61,9 @@ begin
         2: regWriteData = memReadData; // lw
       endcase
 			regWriteEnable	=	1;
-			pcOp						= `PCAdd4;
 			memWriteEnable	=	0;
 			memWriteData		=	0;
+			pcWriteEnable		= 0;
 		end
 		`MemWrite:
 		begin
@@ -65,14 +74,17 @@ begin
         2: memWriteData = regReadData1; // sw
       endcase
 			memWriteEnable	=	1;
-			pcOp						= `PCAdd4;
 			regWriteData		= 0;
 			regWriteEnable	=	0;
+			pcWriteEnable		= 0;
 		end
 		`PCSelectWrite:
 		begin
-			pcOp						=	aluO ? `PCAddImm : `PCAdd4;
-			pcWriteData			=	imm;
+			if (aluO)
+			begin
+				pcWriteEnable		= 1;
+				pcWriteData			=	PC + imm - 12;
+			end
 			regWriteData		= 0;
 			regWriteEnable	=	0;
 			memWriteEnable	=	0;
@@ -80,7 +92,7 @@ begin
 		end
 		`PCWrite:
 		begin
-			pcOp						=	`PCSetImm;
+			pcWriteEnable		= 1;
 			pcWriteData			=	aluO;
 			regWriteData		=	pcReadData;
 			regWriteEnable	=	1;
@@ -89,4 +101,5 @@ begin
 		end
 	endcase
 end
+DataMem mem(clk, memAddr, memReadData, memWriteEnable, memWriteData, pcReadData);
 endmodule

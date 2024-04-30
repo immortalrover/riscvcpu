@@ -4,6 +4,7 @@ module Forward (
 	input		[`RegNumWidth-1:0]	regReadNum0, // RegNumWidth = 5
 	input		[`RegNumWidth-1:0]	regReadNum1,
 	input		[`RegNumWidth-1:0]	regWriteNum,
+
 	output											forwardA1,
 	output											forwardA2,
 	output											forwardB1,

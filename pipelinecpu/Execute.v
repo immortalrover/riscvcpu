@@ -5,31 +5,33 @@ module Execute (
 	input				[`OpcodeWidth-1:0]	opcode, // OpcodeWidth = 7
 	input				[`Func3Width-1:0]		func3, // Func3Width = 3
 	input				[`Func7Width-1:0]		func7, // Func7Width = 7
+	
 	input				[`DataWidth-1:0]		regReadData0, // DataWidth = 32
 	input				[`DataWidth-1:0]		regReadData1,
 	output													regWriteEnable,
 	output			[`DataWidth-1:0]		regWriteData,
 	input				[`DataWidth-1:0]		imm,
-	input				[`AddrWidth-1:0]		pcReadData, // AddrWidth = 32
+
+	input				[`AddrWidth-1:0]		PC, // AddrWidth = 32
 	output			[`DataWidth-1:0]		pcWriteData,
 	output													pcWriteEnable,
 
 	input														forward1,
 	output			[`DataWidth-1:0]		aluO1,
-
 	input														hazard
 );
 
-reg		[`DataWidth-1:0]		regOutData1[1:0];
-reg		[`DataWidth-1:0]		aluOut[1:0];
+reg		[`DataWidth-1:0]		aluOut[1:0]; // reg for store alu out data
 reg		[`ALUOpWidth-1:0]		aluOp; // ALUOpWidth = 5
 reg		[`DataWidth-1:0]		aluX;
 reg		[`DataWidth-1:0]		aluY;
 wire	[`DataWidth-1:0]		aluO;
 reg		[`StateWidth-1:0]		state[1:0]; // StateWidth = 4
 reg		[`DataWidth-1:0]		immData[1:0];
-reg		[`DataWidth-1:0]		regInData[1:0];
-reg		[`Func3Width-1:0]		func3Data[1:0];
+reg		[`DataWidth-1:0]		regInData[1:0]; // reg for regWriteData
+reg		[`Func3Width-1:0]		func3Data[1:0]; // reg for storing func3 data
+reg		[`DataWidth-1:0]		regOutData1[1:0]; // reg for storing rs2 data
+assign aluO1 = forward1 ? aluO : 0;
 
 always @(*)
 begin
@@ -38,7 +40,7 @@ begin
 		aluX = 0;
 		aluY = 0;
 		regInData[1] = 0;
-		/* state[1] = `IDLE; */
+		state[1] = `IDLE;
 	end
 	else if (clk)
 	begin
@@ -107,7 +109,7 @@ begin
 				end
 				7'b1101111: // FMT J jal
 				begin
-					aluX = pcReadData;
+					aluX = PC;
 					aluY = imm;
 					aluOp = `ADD;
 					state[1]	= `RegWrite;
@@ -127,7 +129,7 @@ begin
 				end
 				7'b0010111: // FMT U auipc
 				begin
-					aluX = pcReadData;
+					aluX = PC;
 					aluY = imm;
 					aluOp	=	`ADD;
 					state[1]	=	`RegWrite;
@@ -150,24 +152,18 @@ end
 
 always @(posedge clk)
 begin
-	/* if(~hazard) */
-	/* begin */
-		state[0] <= state[1];
-		immData[0] <= immData[1];
-		func3Data[0] <= func3Data[1];
-		regOutData1[0] <= regOutData1[1];
-		aluOut[0] <= aluOut[1];
-	/* end */
+	state[0] <= state[1];
+	immData[0] <= immData[1];
+	func3Data[0] <= func3Data[1];
+	regOutData1[0] <= regOutData1[1];
+	aluOut[0] <= aluOut[1];
 end
-assign aluO1 = forward1 ? aluO : 0;
 
 ALU	alu(aluOp, aluX, aluY, aluO);
 
 Controller control(
 	clk, reset,state[0], 
-	func3Data[0], immData[0], regOutData1[0], aluOut[0], pcReadData,
-	regWriteEnable, regWriteData,
-	/* memAddr, memReadData, memWriteEnable, memWriteData, */
-	pcWriteEnable, pcWriteData
+	func3Data[0], immData[0], regOutData1[0], aluOut[0], PC,
+	regWriteEnable, regWriteData, pcWriteEnable, pcWriteData
 );
 endmodule

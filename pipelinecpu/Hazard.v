@@ -15,7 +15,5 @@ end
 always @(posedge clk)
 begin
 	if (hazard) i = i - 1;
-
-	/* if (forward1 && ~regWriteEnable) i = 10; */
 end
 endmodule

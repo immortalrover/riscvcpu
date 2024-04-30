@@ -12,21 +12,17 @@ module Controller (
 
 	output	reg											regWriteEnable,
 	output	reg	[`DataWidth-1:0]		regWriteData,
-
-	/* output	reg	[`AddrWidth-1:0]		memAddr, // AddrWidth = 32 */
-	/* input				[`DataWidth-1:0]		memReadData, */
-	/* output	reg											memWriteEnable, */
-	/* output	reg	[`DataWidth-1:0]		memWriteData, */
-
 	output	reg											pcWriteEnable,
 	output	reg	[`DataWidth-1:0]		pcWriteData
 );
 
-reg	[`AddrWidth-1:0]		memAddr;
+// MEM
+reg		[`AddrWidth-1:0]		memAddr;
 wire	[`DataWidth-1:0]		memReadData;
-reg											memWriteEnable;
-reg	[`DataWidth-1:0]		memWriteData;
-/* reg		[`AddrWidth-1:0]		memWriteAddr; // AddrWidth = 32 */
+reg												memWriteEnable;
+reg		[`DataWidth-1:0]		memWriteData;
+
+initial pcWriteEnable = 0;
 always @(*) 
 begin
 	if (reset) 
@@ -94,12 +90,14 @@ begin
 		begin
 			pcWriteEnable		= 1;
 			pcWriteData			=	aluO;
-			regWriteData		=	pcReadData;
+			regWriteData		=	PC;
 			regWriteEnable	=	1;
 			memWriteEnable	=	0;
 			memWriteData		=	0;
 		end
 	endcase
 end
-DataMem mem(clk, memAddr, memReadData, memWriteEnable, memWriteData, pcReadData);
+
+DataMem mem(clk, memAddr, memReadData, memWriteEnable, memWriteData, PC);
+
 endmodule

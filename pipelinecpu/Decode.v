@@ -9,6 +9,7 @@ module Decode (
 	output										hazard
 );
 
+// ID
 reg		[`OpcodeWidth-1:0]		opcode[1:0]; /* = instr[6:0]; */ // OpcodeWidth = 7
 reg		[`Func3Width-1:0]			func3[1:0]; /* = instr[14:12]; */ // Func3Width = 3
 reg		[`Func7Width-1:0]			func7[1:0]; /* = instr[31:25]; */ // Func7Width = 7
@@ -17,22 +18,28 @@ wire	[`RegNumWidth-1:0]		regNum0 = instr[19:15];
 wire	[`RegNumWidth-1:0]		regNum1 = instr[24:20];
 wire  [`DataWidth-1:0]			regReadData0;
 wire  [`DataWidth-1:0]			regReadData1;
-wire												regWriteEnable;
-wire  [`DataWidth-1:0]			regWriteData;
-reg		[`DataWidth-1:0]			regInData[1:0];
-reg													regInEnable[1:0];
-reg		[`DataWidth-1:0]			imm[1:0];
 reg		[`DataWidth-1:0]			regOutData0[1:0];
 reg		[`DataWidth-1:0]			regOutData1[1:0];
-wire	[`DataWidth-1:0]			aluO1;
+reg		[`DataWidth-1:0]			imm[1:0];
+// Forward
 wire forwardA1, forwardA2, forwardB1, forwardB2;
 wire forward1 = forwardA1 | forwardB1;
-
 wire	[1:0]									forwardA = {forwardA1, forwardA2};
 wire	[1:0]									forwardB = {forwardB1, forwardB2};
+wire	[`DataWidth-1:0]			aluO1;
+// WB
+wire												regWriteEnable;
+wire  [`DataWidth-1:0]			regWriteData;
+reg		[`DataWidth-1:0]			regInData[1:0]; // reg for regWriteData
+reg													regInEnable[1:0]; // reg for regInEnable
 
 always @(*)
 begin
+	// ID
+	opcode[1] = instr[6:0];
+	func3[1] = instr[14:12];
+	func7[1] = instr[31:25];
+	regWriteNum[3] = instr[11:7];
 	case({instr[6:0]}) // opcode
 		7'b0010011, 7'b1100111, 7'b0000011:	// FMT I
 			case({instr[14:12]}) // func3
@@ -52,10 +59,8 @@ begin
 		default:
 			imm[1] = 32'bz;
 	endcase
-	opcode[1] = instr[6:0];
-	func3[1] = instr[14:12];
-	func7[1] = instr[31:25];
-	regWriteNum[3] = instr[11:7];
+
+	// Forward
 	case (forwardA)
 		2'b00:
 			regOutData0[1] = regReadData0;
@@ -66,6 +71,7 @@ begin
 		default:
 			regOutData0[1] = regReadData0;
 	endcase
+
 	case (forwardB)
 		2'b00:
 			regOutData1[1] = regReadData1;
@@ -76,8 +82,8 @@ begin
 		default:
 			regOutData1[1] = regReadData1;
 	endcase
-	/* regOutData0[1] = forwardA1 ? aluO1 : forwardA2 ? regInData[1] : regReadData0; */
-	/* regOutData1[1] = forwardB1 ? aluO1 : forwardB2 ? regInData[1] : regReadData1; */
+
+	// WB
 	regInData[1] = regWriteData;
 	regInEnable[1] = regWriteEnable;
 end
@@ -94,7 +100,8 @@ begin
 		regOutData1[0] <= regOutData1[1];	
 		regWriteNum[2] <= regWriteNum[3];
 	end
-	else regWriteNum[2] <= 0;
+	else regWriteNum[2] <= 0; // flushing rd reg
+
 	regWriteNum[1] <= regWriteNum[2];
 	regWriteNum[0] <= regWriteNum[1];
 	regInData[0] <= regInData[1];
@@ -117,12 +124,14 @@ RegsFile RF(
 
 Execute EX(
 	clk, reset, opcode[0], func3[0],func7[0], 
-	regOutData0[0], regOutData1[0], regWriteEnable, regWriteData, 
-	imm[0], PC, pcWriteData, pcWriteEnable, forward1, aluO1, hazard
+	regOutData0[0], regOutData1[0], regWriteEnable, regWriteData, imm[0],
+	PC, pcWriteData, pcWriteEnable,
+	forward1, aluO1, hazard
 );
 
 Forward Forwarding(
-	clk, regNum0, regNum1, regWriteNum[2], forwardA1, forwardA2, forwardB1, forwardB2
+	clk, regNum0, regNum1, regWriteNum[2],
+	forwardA1, forwardA2, forwardB1, forwardB2
 );
 
 Hazard hazarding(clk, forward1, opcode[0], hazard);

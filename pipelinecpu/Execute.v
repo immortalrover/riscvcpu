@@ -61,7 +61,7 @@ begin
 						7: aluOp = `AND; // and
 					endcase
 					aluX = regReadData0;
-					aluY = regOutData1[1]; // regOutData1 === regReadData1
+					aluY = regReadData1; // regOutData1 === regReadData1
 					state[1] = `RegWrite;
 				end
 				7'b0010011: // FMT I
@@ -105,7 +105,7 @@ begin
 						7: aluOp = `GreaterThanOrEqualUnsigned; // bgeu
 					endcase
 					aluX = regReadData0;
-					aluY = regOutData1[1];
+					aluY = regReadData1;
 					state[1] = `PCSelectWrite;
 				end
 				7'b1101111: // FMT J jal

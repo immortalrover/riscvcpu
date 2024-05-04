@@ -12,13 +12,13 @@ wire	[`AddrWidth-1:0]	pcWriteData;
 wire										pcWriteEnable;
 wire										hazard;
 
-initial pcData[0] = -4;
+initial pcData[0] = 0;
 
 always @(*)
 begin
 	pcData[1] = pcData[0] + 4;
 	instrData[1] = instr;
-	PC = pcData[0];
+	PC = pcData[0] - 16;
 end
 
 always @(posedge clk)
@@ -33,7 +33,7 @@ end
 wire [`InstrWidth-1:0] test = pcData[1];
 wire [`InstrWidth-1:0] test1 = pcData[0];
 
-InstrMem instrMem(PC, instr);
+InstrMem instrMem(pcData[0], instr);
 
-Decode ID(clk, reset, instrData[0], PC, pcWriteData, pcWriteEnable, hazard);
+Decode ID(clk, reset, instrData[0], pcData[0], pcWriteData, pcWriteEnable, hazard);
 endmodule

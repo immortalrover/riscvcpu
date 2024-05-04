@@ -21,6 +21,7 @@ module Execute (
 	input														hazard
 );
 
+reg		[`AddrWidth-1:0]		pcData[2:0];
 reg		[`DataWidth-1:0]		aluOut[1:0]; // reg for store alu out data
 reg		[`ALUOpWidth-1:0]		aluOp; // ALUOpWidth = 5
 reg		[`DataWidth-1:0]		aluX;
@@ -109,27 +110,27 @@ begin
 				end
 				7'b1101111: // FMT J jal
 				begin
-					aluX = PC;
+					aluX = pcData[0];
 					aluY = imm;
 					aluOp = `ADD;
-					state[1]	= `RegWrite;
+					state[1]	= `PCWrite;
 				end
 				7'b1100111: // FMT I jalr
 				begin
 					aluX = regReadData0;
 					aluY = imm;
 					aluOp = `ADD;
-					state[1]	=	`RegWrite;
+					state[1]	=	`PCWrite;
 				end
 				7'b0110111: // FMT U lui
 				begin
 					// WAITING
 					regInData[1] = imm;
-					state[1]	=	`RegWrite;
+					state[1]	=	`LuiRegWrite;
 				end
 				7'b0010111: // FMT U auipc
 				begin
-					aluX = PC;
+					aluX = pcData[0];
 					aluY = imm;
 					aluOp	=	`ADD;
 					state[1]	=	`RegWrite;
@@ -148,6 +149,7 @@ begin
 	func3Data[1] = func3;
 	regOutData1[1] = regReadData1;
 	aluOut[1] = aluO;
+	pcData[2] = PC;
 end
 
 always @(posedge clk)
@@ -157,6 +159,8 @@ begin
 	func3Data[0] <= func3Data[1];
 	regOutData1[0] <= regOutData1[1];
 	aluOut[0] <= aluOut[1];
+	pcData[1] <= pcData[2];
+	pcData[0] <= pcData[1];
 end
 
 ALU	alu(aluOp, aluX, aluY, aluO);

@@ -23,7 +23,6 @@
 `define MemWrite											3
 `define PCSelectWrite									4
 `define	PCWrite												5
-`define LuiRegWrite										6
 
 // ALU operation
 `define ADD														4'h0

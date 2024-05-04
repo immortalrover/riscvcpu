@@ -16,7 +16,6 @@ module Controller (
 	output	reg	[`DataWidth-1:0]		pcWriteData
 );
 
-reg		[`DataWidth-1:0]		pcData[3:0];
 // MEM
 reg		[`AddrWidth-1:0]		memAddr;
 wire	[`DataWidth-1:0]		memReadData;
@@ -52,7 +51,11 @@ begin
 		`MemReadRegWrite:
 		begin
 			memAddr					= aluO;
-			regWriteData		= memReadData;
+      case (func3)
+        0: regWriteData = { { 24{ memReadData[7] } }, memReadData[7:0] }; // lb lbu
+        1: regWriteData = { { 16{ memReadData[15] } }, memReadData[15:0] }; // lh lhu
+        2: regWriteData = memReadData; // lw
+      endcase
 			regWriteEnable	=	1;
 			memWriteEnable	=	0;
 			memWriteData		=	0;
@@ -61,7 +64,11 @@ begin
 		`MemWrite:
 		begin
 			memAddr					=	aluO;
-			memWriteData		= regReadData1;
+      case (func3)
+        0: memWriteData = { { 24{ regReadData1[7] } }, regReadData1[7:0] }; // sb
+        1: memWriteData = { { 16{ regReadData1[15] } }, regReadData1[15:0] }; // sh
+        2: memWriteData = regReadData1; // sw
+      endcase
 			memWriteEnable	=	1;
 			regWriteData		= 0;
 			regWriteEnable	=	0;
@@ -72,7 +79,7 @@ begin
 			if (aluO)
 			begin
 				pcWriteEnable		= 1;
-				pcWriteData			=	pcData[0] + imm;
+				pcWriteData			=	PC + imm - 12;
 			end
 			regWriteData		= 0;
 			regWriteEnable	=	0;
@@ -83,29 +90,14 @@ begin
 		begin
 			pcWriteEnable		= 1;
 			pcWriteData			=	aluO;
-			regWriteData		=	pcData[1];
+			regWriteData		=	PC;
 			regWriteEnable	=	1;
 			memWriteEnable	=	0;
 			memWriteData		=	0;
 		end
-		`LuiRegWrite:
-		begin
-			regWriteData		= imm;
-			regWriteEnable	= 1;
-			memWriteEnable	=	0;
-			memWriteData		=	0;
-			pcWriteEnable		= 0;
-		end
 	endcase
-	pcData[3] = PC;
 end
 
-always @(posedge clk)
-begin
-	pcData[2] <= pcData[3];
-	pcData[1] <= pcData[2];
-	pcData[0] <= pcData[1];
-end
-DataMem mem(clk, memAddr, memReadData, memWriteEnable, memWriteData, PC, func3);
+DataMem mem(clk, memAddr, memReadData, memWriteEnable, memWriteData, PC);
 
 endmodule

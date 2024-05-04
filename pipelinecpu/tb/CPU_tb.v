@@ -12,7 +12,7 @@ integer counter = 0;
 initial begin
 	$dumpfile("build/test.vcd");
 	$dumpvars;
-  $readmemh("tb/riscv32_sim2.dat", cpu.instrMem.RAM);
+  $readmemh("tb/sim6.dat", cpu.instrMem.RAM);
   clk = 0;
 end
 
@@ -23,7 +23,7 @@ always begin
    begin
       counter = counter + 1;
       //comment out all display line(s) for online judge
-      if (counter == 100) // set to the address of the last instruction
+      if (counter == 500) // set to the address of the last instruction
        begin
 
          $stop;

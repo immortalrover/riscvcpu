@@ -119,7 +119,7 @@ wire [`RegNumWidth-1:0] testr3 = regWriteNum[3];
 
 RegsFile RF( 
   clk, reset, regNum0, regNum1, regReadData0, regReadData1, 
-  regInEnable[0], regWriteNum[0], regInData[0]
+  regInEnable[0], regWriteNum[0], regInData[0], PC
 );
 
 Execute EX(

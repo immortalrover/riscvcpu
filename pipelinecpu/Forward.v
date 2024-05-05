@@ -1,16 +1,13 @@
 `include "Defines.v"
 module Forward (
-	input		 										clk,
-	input		[`RegNumWidth-1:0]	regReadNum0, // RegNumWidth = 5
-	input		[`RegNumWidth-1:0]	regReadNum1,
-	input		[`RegNumWidth-1:0]	regWriteNum,
-	
-	input												flush,
-	output	reg 	[1:0]				forwardA,
-	output	reg			[1:0]	forwardB
+	input														clk,
+	input				[`RegNumWidth-1:0]	regReadNum0, regReadNum1, regWriteNum, // RegNumWidth = 5
+
+	input														flush,
+	output	reg [1:0]								forwardA, forwardB
 );
-reg										flushing[1:0];
-reg [`RegNumWidth-1:0] regsWriteNum[2:0];
+reg [`RegNumWidth-1:0]	regsWriteNum[2:0];
+reg											flushing[1:0];
 
 always @(*)
 begin

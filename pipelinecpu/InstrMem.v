@@ -1,6 +1,6 @@
 `include "Defines.v"
 module InstrMem(
-  input  [`AddrWidth-1:0]	instrAddr, // AddrWidth = 32
+  input  [`AddrWidth-1:0]		instrAddr, // AddrWidth = 32
   output [`InstrWidth-1:0]	instrData // InstrWidth = 32
 );
 

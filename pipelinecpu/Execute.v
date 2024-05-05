@@ -1,47 +1,41 @@
 `include "Defines.v"
 module Execute (
-	input														clk,
-	input														reset,
+	input														clk, reset,
 	input				[`OpcodeWidth-1:0]	opcode, // OpcodeWidth = 7
 	input				[`Func3Width-1:0]		func3, // Func3Width = 3
 	input				[`Func7Width-1:0]		func7, // Func7Width = 7
 
-	input				[`RegNumWidth-1:0]	regNum0,
-	input				[`RegNumWidth-1:0]	regNum1,
-	input				[`RegNumWidth-1:0]	regWriteNum,
+	input				[`RegNumWidth-1:0]	regNum0, regNum1, regWriteNum, // RegNumWidth = 5
 	input				[`DataWidth-1:0]		imm,
 
 	input				[`AddrWidth-1:0]		PC, // AddrWidth = 32
 	output			[`DataWidth-1:0]		pcWriteData,
 	output													pcWriteEnable,
 
-	output				reg								hazard,
+	output	reg											hazard,
 	input														flush
 );
 
 reg		[`AddrWidth-1:0]		pcData[2:0];
 reg		[`DataWidth-1:0]		aluOut[1:0]; // reg for store alu out data
 reg		[`ALUOpWidth-1:0]		aluOp; // ALUOpWidth = 5
-reg		[`DataWidth-1:0]		aluX;
-reg		[`DataWidth-1:0]		aluY;
+reg		[`DataWidth-1:0]		aluX, aluY;
 wire	[`DataWidth-1:0]		aluO;
 reg		[`StateWidth-1:0]		state[1:0]; // StateWidth = 4
 reg		[`DataWidth-1:0]		immData[1:0];
 reg		[`Func3Width-1:0]		func3Data[1:0]; // reg for storing func3 data
 reg		[`DataWidth-1:0]		regOutData1[1:0]; // reg for storing rs2 data
 wire	[`DataWidth-1:0]		data;
-wire	[1:0]								forwardA;
-wire	[1:0]								forwardB;
-wire	[`DataWidth-1:0]		regReadData0;
-wire	[`DataWidth-1:0]		regReadData1;
+wire	[1:0]								forwardA, forwardB;
+wire	[`DataWidth-1:0]		regReadData0, regReadData1;
 // WB
-wire												regWriteEnable;
-wire  [`DataWidth-1:0]			regWriteData;
+wire											regWriteEnable;
+wire  [`DataWidth-1:0]		regWriteData;
 reg		[`DataWidth-1:0]		regInData[1:0]; // reg for regWriteData
-reg													regInEnable[1:0]; // reg for regInEnable
-reg		[`RegNumWidth-1:0]		regInNum[2:0];
+reg												regInEnable[1:0]; // reg for regInEnable
+reg		[`RegNumWidth-1:0]	regInNum[2:0];
 
-reg													waithazard;
+reg												waithazard;
 
 initial hazard = 0;
 initial waithazard = 0;

@@ -1,7 +1,6 @@
 `include "Defines.v"
 module Decode (
-	input											clk,
-	input											reset,
+	input											clk, reset,
 	input		[`InstrWidth-1:0]	instr, // InstrWidth = 32
 	input		[`AddrWidth-1:0]	PC, // AddrWidth = 32
 	output	[`DataWidth-1:0]	pcWriteData, // DataWidth = 32

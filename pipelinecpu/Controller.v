@@ -1,15 +1,12 @@
 `include "Defines.v"
 module Controller (
-	input														clk,
-	input														reset,
+	input														clk, reset,
 	input				[`StateWidth-1:0]		state, // StateWidth = 4
 
 	input				[`Func3Width-1:0]		func3, // Func3Width = 3
-	input				[`DataWidth-1:0]		imm, // DataWidth = 32
-	input				[`DataWidth-1:0]		regReadData1,
-	input				[`DataWidth-1:0]		aluO,
-	input				[`DataWidth-1:0]		PC,
-	input				[1:0]									forwordB,
+	input				[`DataWidth-1:0]		imm, regReadData1, aluO, // DataWidth = 32
+	input				[`AddrWidth-1:0]		PC, // AddrWidth = 32
+	input				[1:0]								forwordB,
 
 	output	reg [`DataWidth-1:0]		data,
 	output	reg											regWriteEnable,

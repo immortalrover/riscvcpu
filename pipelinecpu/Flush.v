@@ -3,6 +3,7 @@ module Flush (
 	input			pcWriteEnable,
 	output		flush
 );
+
 integer i = 0;
 assign flush = i > 0;
 

@@ -27,10 +27,10 @@ begin
 		instrData[0] <= instrData[1];
 		pcData[4] <= pcWriteEnable ? pcWriteData : pcData[5];
 	end
-	pcData[0] <= pcData[1];
-	pcData[1] <= pcData[2];
-	pcData[2] <= pcData[3];
 	pcData[3] <= pcData[4];
+	pcData[2] <= pcData[3];
+	pcData[1] <= pcData[2];
+	pcData[0] <= pcData[1];
 end
 
 InstrMem instrMem(pcData[4], instr);

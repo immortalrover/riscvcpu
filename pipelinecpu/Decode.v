@@ -47,15 +47,17 @@ begin
 end
 
 always @(posedge clk)
-if(~hazard)
 begin
-	opcode[0] <= opcode[1];
-	func3[0] <= func3[1];
-	func7[0] <= func7[1];
-	regWriteNum[0] <= regWriteNum[1];
-	regNum0[0] <= regNum0[1];
-	regNum1[0] <= regNum1[1];
-	imm[0] <= imm[1];
+	if(~hazard)
+	begin
+		opcode[0] <= opcode[1];
+		func3[0] <= func3[1];
+		func7[0] <= func7[1];
+		regWriteNum[0] <= regWriteNum[1];
+		regNum0[0] <= regNum0[1];
+		regNum1[0] <= regNum1[1];
+		imm[0] <= imm[1];
+	end
 end
 
 Execute EX(

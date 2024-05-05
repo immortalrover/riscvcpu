@@ -20,12 +20,10 @@ always @(*) if (reset) for ( i = 0; i < 32; i=i+1) regs[i] = 0;
 always @(*) pcData[4] = PC;
 
 always @(negedge clk)
+if (regWriteEnable && regWriteNum != 0)
 begin
-  if (regWriteEnable && regWriteNum != 0)
-  begin
-    regs[regWriteNum] <= regWriteData;
-    $display("pc = %h: x%d = %h", pcData[0], regWriteNum, regWriteData);
-  end
+  regs[regWriteNum] <= regWriteData;
+  $display("pc = %h: x%d = %h", pcData[0], regWriteNum, regWriteData);
 end
 
 always @(posedge clk)

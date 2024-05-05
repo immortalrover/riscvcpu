@@ -17,10 +17,7 @@ begin
 	pcData[1] = pcData[0] + 4;
 end
 
-always @(posedge clk)
-begin
-	pcData[0] <= pcWriteEnable ? pcWriteData : pcData[1];
-end
+always @(posedge clk) pcData[0] <= pcWriteEnable ? pcWriteData : pcData[1];
 
 InstrMem	instrMem(.instrAddr(pcData[0]), .instrData(instr));
 

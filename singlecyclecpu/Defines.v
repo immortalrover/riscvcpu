@@ -8,7 +8,6 @@
 `define RegNumWidth										5
 `define ALUOpWidth										4
 `define StateWidth										3
-`define PCOpWidth											2
 
 // States
 `define IDLE													0

@@ -23,80 +23,78 @@ initial begin
 end
 
 always @(*) 
+if (reset)
 begin
-	if (reset)
+  pcWriteEnable     = 1;
+  pcWriteData       = 0;
+end
+else 
+case (state)
+	`IDLE:
   begin
-    pcWriteEnable     = 1;
-    pcWriteData       = 0;
+    regWriteData    = 0;
+    regWriteEnable  = 0;
+    memWriteEnable  = 0;
+    memWriteData    = 0;
+    pcWriteEnable   = 0;
   end
-	else 
-	case (state)
-		`IDLE:
-    begin
-      regWriteData    = 0;
-      regWriteEnable  = 0;
-      memWriteEnable  = 0;
-      memWriteData    = 0;
-      pcWriteEnable   = 0;
-    end
-		`RegWrite:
-		begin
-			regWriteData    = aluO;
-      regWriteEnable  = 1;
-      memWriteEnable  = 0;
-      memWriteData    = 0;
-      pcWriteEnable   = 0;
-		end	
-		`MemReadRegWrite:
-    begin
-      memAddr         = aluO;
-      regWriteData    = memReadData;
-      regWriteEnable  = 1;
-      memWriteEnable  = 0;
-      memWriteData    = 0;
-      pcWriteEnable   = 0;
-    end
-		`MemWrite:
-		begin
-			memAddr         = aluO;
-      memWriteData    = regReadData1;
-      memWriteEnable  = 1;
-      regWriteData    = 0;
-      regWriteEnable  = 0;
-      pcWriteEnable   = 0;
-		end
-		`PCSelectWrite:
-    begin
-      if (aluO)
-      begin
-        pcWriteEnable   = 1;
-        pcWriteData     = PC + imm;
-			end
-			else pcWriteEnable = 0;
-      regWriteData    = 0;
-      regWriteEnable  = 0;
-      memWriteEnable  = 0;
-      memWriteData    = 0;
-    end
-		`PCWrite:
+	`RegWrite:
+	begin
+		regWriteData    = aluO;
+    regWriteEnable  = 1;
+    memWriteEnable  = 0;
+    memWriteData    = 0;
+    pcWriteEnable   = 0;
+	end	
+	`MemReadRegWrite:
+  begin
+    memAddr         = aluO;
+    regWriteData    = memReadData;
+    regWriteEnable  = 1;
+    memWriteEnable  = 0;
+    memWriteData    = 0;
+    pcWriteEnable   = 0;
+  end
+	`MemWrite:
+	begin
+		memAddr         = aluO;
+    memWriteData    = regReadData1;
+    memWriteEnable  = 1;
+    regWriteData    = 0;
+    regWriteEnable  = 0;
+    pcWriteEnable   = 0;
+	end
+	`PCSelectWrite:
+  begin
+    if (aluO)
     begin
       pcWriteEnable   = 1;
-      pcWriteData     = aluO;
-      regWriteData    = PC;
-      regWriteEnable  = 1;
-      memWriteEnable  = 0;
-      memWriteData    = 0;
-    end
-    `LuiRegWrite:
-    begin
-      regWriteData    = imm;
-      regWriteEnable  = 1;
-      memWriteEnable  = 0;
-      memWriteData    = 0;
-      pcWriteEnable   = 0;
-    end
-	endcase
-end
+      pcWriteData     = PC + imm;
+		end
+		else pcWriteEnable = 0;
+    regWriteData    = 0;
+    regWriteEnable  = 0;
+    memWriteEnable  = 0;
+    memWriteData    = 0;
+  end
+	`PCWrite:
+  begin
+    pcWriteEnable   = 1;
+    pcWriteData     = aluO;
+    regWriteData    = PC;
+    regWriteEnable  = 1;
+    memWriteEnable  = 0;
+    memWriteData    = 0;
+  end
+  `LuiRegWrite:
+  begin
+    regWriteData    = imm;
+    regWriteEnable  = 1;
+    memWriteEnable  = 0;
+    memWriteData    = 0;
+    pcWriteEnable   = 0;
+  end
+endcase
 
 DataMem mem(clk, memAddr, memReadData, memWriteEnable, memWriteData, PC, func3);
 endmodule

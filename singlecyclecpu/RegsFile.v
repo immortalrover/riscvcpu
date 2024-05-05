@@ -17,12 +17,10 @@ assign regReadData1 = (regNum1 != 0) ? regs[regNum1] : 0;
 always @(*) if (reset) for ( i = 0; i < 32; i=i+1) regs[i] = 0;
 
 always @(negedge clk)
+if (regsWriteEnable && regWriteNum != 0)
 begin
-  if (regsWriteEnable && regWriteNum != 0)
-  begin
-    regs[regWriteNum] <= regWriteData;
-    $display("x%d = %h", regWriteNum, regWriteData);
-  end
+  regs[regWriteNum] <= regWriteData;
+  $display("x%d = %h", regWriteNum, regWriteData);
 end
 
 endmodule

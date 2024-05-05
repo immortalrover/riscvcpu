@@ -102,7 +102,7 @@ begin
 		end
 	endcase
 	case (state)
-		`RegWrite, `MemReadRegWrite, `PCWrite, `LuiRegWrite:	data = regWriteData;
+		`RegWrite, `MemReadRegWrite, `PCWrite, `LuiRegWrite: data = regWriteData;
 		`MemWrite: data = memWriteData;
 	endcase
 	pcData[3] = PC;
@@ -116,6 +116,6 @@ begin
 	data1 <= forwordB ? data : memReadData;
   data2 <= forwordB ? data : regReadData1;
 end
-DataMem mem(clk, memAddr, memReadData, memWriteEnable, memWriteData, PC, func3);
 
+DataMem mem(clk, memAddr, memReadData, memWriteEnable, memWriteData, PC, func3);
 endmodule

@@ -4,48 +4,55 @@ module Execute (
 	input				[`OpcodeWidth-1:0]	opcode, // OpcodeWidth = 7
 	input				[`Func3Width-1:0]		func3, // Func3Width = 3
 	input				[`Func7Width-1:0]		func7, // Func7Width = 7
-
 	input				[`RegNumWidth-1:0]	regNum0, regNum1, regWriteNum, // RegNumWidth = 5
 	input				[`DataWidth-1:0]		imm,
-
 	input				[`AddrWidth-1:0]		PC, // AddrWidth = 32
 	output			[`DataWidth-1:0]		pcWriteData,
 	output													pcWriteEnable,
-
 	output	reg											hazard,
 	input														flush
 );
 
-reg		[`AddrWidth-1:0]		pcData[2:0];
-reg		[`DataWidth-1:0]		aluOut[1:0]; // reg for store alu out data
 reg		[`ALUOpWidth-1:0]		aluOp; // ALUOpWidth = 5
 reg		[`DataWidth-1:0]		aluX, aluY;
 wire	[`DataWidth-1:0]		aluO;
+reg		[`DataWidth-1:0]		aluOut[1:0]; // reg for store alu out data
+wire	[`DataWidth-1:0]		regReadData0, regReadData1;
+wire											regWriteEnable;
+wire  [`DataWidth-1:0]		regWriteData;
+reg		[`DataWidth-1:0]		regInData[1:0]; // reg for regWriteData
+reg												regInEnable[1:0]; // reg for regInEnable
+reg		[`RegNumWidth-1:0]	regInNum[2:0];
+reg		[`AddrWidth-1:0]		pcData[2:0];
 reg		[`StateWidth-1:0]		state[1:0]; // StateWidth = 4
 reg		[`DataWidth-1:0]		immData[1:0];
 reg		[`Func3Width-1:0]		func3Data[1:0]; // reg for storing func3 data
 reg		[`DataWidth-1:0]		regOutData1[1:0]; // reg for storing rs2 data
 wire	[`DataWidth-1:0]		data;
 wire	[1:0]								forwardA, forwardB;
-wire	[`DataWidth-1:0]		regReadData0, regReadData1;
-// WB
-wire											regWriteEnable;
-wire  [`DataWidth-1:0]		regWriteData;
-reg		[`DataWidth-1:0]		regInData[1:0]; // reg for regWriteData
-reg												regInEnable[1:0]; // reg for regInEnable
-reg		[`RegNumWidth-1:0]	regInNum[2:0];
-
 reg												waithazard;
-
 initial hazard = 0;
 initial waithazard = 0;
+
 always @(*)
 begin
+	immData[1] = imm;
+	func3Data[1] = func3;
+	aluOut[1] = aluO;
+	pcData[2] = PC;
+	regInData[1] = regWriteData;
+	regInEnable[1] = regWriteEnable;
+	regInNum[2] = regWriteNum;
+	case (forwardB)
+		2'b00: regOutData1[1] = regReadData1;
+		2'b01: regOutData1[1] = regInData[0];
+		2'b11,2'b10: regOutData1[1] = data;
+		default: regOutData1[1] = regReadData1;
+	endcase
 	if (reset) begin
 		aluOp = `ADD;
 		aluX = 0;
 		aluY = 0;
-		regInData[1] = 0;
 		state[1] = `IDLE;
 	end
 	else if (clk)
@@ -65,29 +72,18 @@ begin
 						6: aluOp = `OR; // or
 						7: aluOp = `AND; // and
 					endcase
-
 					case (forwardA)
-						2'b00:
-							aluX = regReadData0;
-						2'b01:
-							aluX = regInData[0];
-						2'b11,2'b10:
-							aluX = data;
-						default:
-							aluX = regReadData0;
+						2'b00: aluX = regReadData0;
+						2'b01: aluX = regInData[0];
+						2'b11,2'b10: aluX = data;
+						default: aluX = regReadData0;
 					endcase
-
 					case (forwardB)
-						2'b00:
-							aluY = regReadData1;
-						2'b01:
-							aluY = regInData[0];
-						2'b11,2'b10:
-							aluY = data;
-						default:
-							aluY = regReadData1;
+						2'b00: aluY = regReadData1;
+						2'b01: aluY = regInData[0];
+						2'b11,2'b10: aluY = data;
+						default: aluY = regReadData1;
 					endcase
-
 					state[1] = `RegWrite;
 				end
 				7'b0010011: // FMT I
@@ -102,59 +98,37 @@ begin
 						6: aluOp = `OR; // ori
 						7: aluOp = `AND; // andi
 					endcase
-
 					case (forwardA)
-						2'b00:
-							aluX = regReadData0;
-						2'b01:
-							aluX = regInData[0];
-						2'b11,2'b10:
-							aluX = data;
-						default:
-							aluX = regReadData0;
+						2'b00: aluX = regReadData0;
+						2'b01: aluX = regInData[0];
+						2'b11,2'b10: aluX = data;
+						default: aluX = regReadData0;
 					endcase
-
 					aluY = imm;
-
 					state[1] = `RegWrite;
 				end
 				7'b0000011: // FMT I lb lh lw lbu lhu
 				begin
 					case (forwardA)
-						2'b00:
-							aluX = regReadData0;
-						2'b01:
-							aluX = regInData[0];
-						2'b11,2'b10:
-							aluX = data;
-						default:
-							aluX = regReadData0;
+						2'b00: aluX = regReadData0;
+						2'b01: aluX = regInData[0];
+						2'b11,2'b10: aluX = data;
+						default: aluX = regReadData0;
 					endcase
-
 					aluY = imm;
-
 					aluOp = `ADD;
-
 					state[1] = `MemReadRegWrite; // Read memory and write register
-
 				end
 				7'b0100011: // FMT S sb sh sw
 				begin
 					case (forwardA)
-						2'b00:
-							aluX = regReadData0;
-						2'b01:
-							aluX = regInData[0];
-						2'b11,2'b10:
-							aluX = data;
-						default:
-							aluX = regReadData0;
+						2'b00: aluX = regReadData0;
+						2'b01: aluX = regInData[0];
+						2'b11,2'b10: aluX = data;
+						default: aluX = regReadData0;
 					endcase
-					
 					aluY = imm;
-
 					aluOp = `ADD;
-					
 					state[1]	= `MemWrite;
 				end
 				7'b1100011: // FMT B
@@ -167,58 +141,37 @@ begin
 						6: aluOp = `LesserThanUnsigned; // bltu
 						7: aluOp = `GreaterThanOrEqualUnsigned; // bgeu
 					endcase
-
 					case (forwardA)
-						2'b00:
-							aluX = regReadData0;
-						2'b01:
-							aluX = regInData[0];
-						2'b11,2'b10:
-							aluX = data;
-						default:
-							aluX = regReadData0;
+						2'b00: aluX = regReadData0;
+						2'b01: aluX = regInData[0];
+						2'b11,2'b10: aluX = data;
+						default: aluX = regReadData0;
 					endcase
-
 					case (forwardB)
-						2'b00:
-							aluY = regReadData1;
-						2'b01:
-							aluY = regInData[0];
-						2'b11,2'b10:
-							aluY = data;
-						default:
-							aluY = regReadData1;
+						2'b00: aluY = regReadData1;
+						2'b01: aluY = regInData[0];
+						2'b11,2'b10: aluY = data;
+						default: aluY = regReadData1;
 					endcase
-
 					state[1] = `PCSelectWrite;
 				end
 				7'b1101111: // FMT J jal
 				begin
 					aluX = pcData[0];
-
 					aluY = imm;
-					
 					aluOp = `ADD;
-					
 					state[1]	= `PCWrite;
 				end
 				7'b1100111: // FMT I jalr
 				begin
 					case (forwardA)
-						2'b00:
-							aluX = regReadData0;
-						2'b01:
-							aluX = regInData[0];
-						2'b11,2'b10:
-							aluX = data;
-						default:
-							aluX = regReadData0;
+						2'b00: aluX = regReadData0;
+						2'b01: aluX = regInData[0];
+						2'b11,2'b10: aluX = data;
+						default: aluX = regReadData0;
 					endcase
-
 					aluY = imm;
-					
 					aluOp = `ADD;
-					
 					state[1]	=	`PCWrite;
 				end
 				7'b0110111: // FMT U lui
@@ -228,11 +181,8 @@ begin
 				7'b0010111: // FMT U auipc
 				begin
 					aluX = pcData[0];
-					
 					aluY = imm;
-					
 					aluOp	=	`ADD;
-					
 					state[1]	=	`RegWrite;
 				end
 				default: state[1] = `IDLE;
@@ -245,32 +195,11 @@ begin
 			state[1] = `IDLE;
 		end
 	end
-	immData[1] = imm;
-	func3Data[1] = func3;
-	case (forwardB)
-		2'b00:
-			regOutData1[1] = regReadData1;
-		2'b01:
-			regOutData1[1] = regInData[0];
-		2'b11,2'b10:
-			regOutData1[1] = data;
-		default:
-			regOutData1[1] = regReadData1;
-	endcase
-	aluOut[1] = aluO;
-	pcData[2] = PC;
-	regInData[1] = regWriteData;
-	regInEnable[1] = regWriteEnable;
-	regInNum[2] = regWriteNum;
 end
 
 always @(posedge clk)
 begin
-	if (~hazard) begin
-		state[0] <=  state[1];
-	end else begin
-		state[0] <= 0;
-	end
+	state[0] <= hazard ? 0 : state[1];
 	immData[0] <= immData[1];
 	func3Data[0] <= func3Data[1];
 	regOutData1[0] <= regOutData1[1];

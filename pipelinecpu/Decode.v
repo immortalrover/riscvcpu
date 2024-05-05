@@ -60,8 +60,6 @@ begin
 	end
 end
 
-wire [`RegNumWidth-1:0] testr1 = regWriteNum[1];
-
 Execute EX(
 	clk, reset, opcode[0], func3[0],func7[0],
 	regNum0[0], regNum1[0], regWriteNum[0], imm[0],

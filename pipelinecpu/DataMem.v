@@ -14,7 +14,6 @@ reg  [`DataWidth-1:0] RAM[1023:0];
 always @(*)
 begin
 	if (memWriteEnable) 
-	begin
 		case (memAddr[1:0])
 			0:
 			case (func3)
@@ -37,7 +36,6 @@ begin
 	      0: RAM[memAddr[11:2]][31:24] = memWriteData[7:0]; // sb
 	    endcase
 		endcase
-	end
 
 	case (memAddr[1:0])
 		0:

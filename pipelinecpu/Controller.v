@@ -15,19 +15,23 @@ module Controller (
 
 reg		[`DataWidth-1:0]		pcData[3:0];
 // MEM
-reg		[`AddrWidth-1:0]		memAddr;
-wire	[`DataWidth-1:0]		memReadData;
 reg												memWriteEnable;
+reg		[`AddrWidth-1:0]		memAddr;
 reg		[`DataWidth-1:0]		memWriteData;
-reg		[`AddrWidth-1:0]		Addr[1:0];
-
-reg [`DataWidth-1:0] data1;
-reg [`DataWidth-1:0] data2;
+wire	[`DataWidth-1:0]		memReadData;
+reg		[`DataWidth-1:0]		data1;
+reg		[`DataWidth-1:0]		data2;
 
 initial pcWriteData = 0;
 initial pcWriteEnable = 0;
+
 always @(*) 
 begin
+	pcData[3] = PC;
+	case (state)
+		`MemWrite: data = memWriteData;
+		`RegWrite, `MemReadRegWrite, `PCWrite, `LuiRegWrite: data = regWriteData;
+	endcase
 	if (reset) 
 	begin
 		pcWriteEnable			= 1;
@@ -99,20 +103,15 @@ begin
 			pcWriteEnable		= 0;
 		end
 	endcase
-	case (state)
-		`RegWrite, `MemReadRegWrite, `PCWrite, `LuiRegWrite: data = regWriteData;
-		`MemWrite: data = memWriteData;
-	endcase
-	pcData[3] = PC;
 end
 
 always @(posedge clk)
 begin
-	pcData[2] <= pcData[3];
-	pcData[1] <= pcData[2];
-	pcData[0] <= pcData[1];
 	data1 <= forwordB ? data : memReadData;
   data2 <= forwordB ? data : regReadData1;
+	pcData[0] <= pcData[1];
+	pcData[1] <= pcData[2];
+	pcData[2] <= pcData[3];
 end
 
 DataMem mem(clk, memAddr, memReadData, memWriteEnable, memWriteData, PC, func3);

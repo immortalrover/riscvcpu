@@ -229,8 +229,6 @@ begin
 				end
 				7'b0110111: // FMT U lui
 				begin
-					regInData[1] = imm;
-					
 					state[1]	=	`LuiRegWrite;
 				end
 				7'b0010111: // FMT U auipc

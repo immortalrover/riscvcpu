@@ -16,6 +16,9 @@ reg [`DataWidth-1:0] regs[31:0];
 
 integer i;
 initial for ( i = 0; i < 32; i=i+1) regs[i] = 0;
+assign regReadData0 = (regNum0 != 0) ? regs[regNum0] : 0;
+assign regReadData1 = (regNum1 != 0) ? regs[regNum1] : 0;
+
 always @(*) if (reset) for ( i = 0; i < 32; i=i+1) regs[i] = 0;
 
 // three ported register file
@@ -36,6 +39,4 @@ begin
   end
 end
 
-assign regReadData0 = (regNum0 != 0) ? regs[regNum0] : 0;
-assign regReadData1 = (regNum1 != 0) ? regs[regNum1] : 0;
 endmodule

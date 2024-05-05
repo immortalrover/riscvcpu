@@ -2,19 +2,28 @@
 `define InstrWidth										32
 `define AddrWidth											32
 `define DataWidth											32
+`define OpcodeWidth										7
+`define Func3Width										3
+`define Func7Width										7
+`define RegNumWidth										5
+`define ALUOpWidth										4
+`define StateWidth										3
+`define PCOpWidth											2
 
 // PC
-`define PCClear												3'h0
-`define PCAdd4												3'h1
-`define PCAddImm											3'h2
-`define PCSetImm											3'h3
+`define PCAdd4												0
+`define PCAddImm											1
+`define PCSetImm											2
+`define PCClear												3
 
 // States
-`define IDLE													3'h0
-`define RegsWrite											3'h1
-`define MemtoRegs											3'h2
-`define MemWrite											3'h3
-`define PCWrite												3'h4
+`define IDLE													0
+`define RegWrite											1
+`define MemReadRegWrite								2
+`define MemWrite											3
+`define PCSelectWrite									4
+`define	PCWrite												5
+`define LuiRegWrite										6
 
 // ALU operation
 `define ADD														4'h0

@@ -3,11 +3,9 @@ module RegsFile(
   input												clk, reset,
   input  [`RegNumWidth-1:0]		regNum0, regNum1, // RegNumWidth = 5
   output [`DataWidth-1:0]			regReadData0, regReadData1, // DataWidth = 32
-
   input												regWriteEnable, // 1 => WRITE
   input  [`RegNumWidth-1:0]		regWriteNum,
   input  [`DataWidth-1:0]			regWriteData,
-
 	input	 [`AddrWidth-1:0]			PC // AddrWidth = 32
 );
 

@@ -1,10 +1,9 @@
 `include "Defines.v"
 module Decode (
-	input											clk,
-	input											reset,
+	input											clk, reset,
 	input		[`InstrWidth-1:0]	instr, // InstrWidth = 32
 	input		[`AddrWidth-1:0]	pcReadData, // AddrWidth = 32
-	output								pcWriteEnable,
+	output										pcWriteEnable,
 	output	[`DataWidth-1:0]	pcWriteData // DataWidth = 32
 );
 
@@ -14,7 +13,7 @@ wire	[`Func7Width-1:0]		func7				= instr[31:25]; // Func7Width = 7
 wire	[`RegNumWidth-1:0]	regWriteNum	= instr[11:7]; // RegNumWidth = 5
 wire	[`RegNumWidth-1:0]	regNum0			= instr[19:15];
 wire	[`RegNumWidth-1:0]	regNum1			= instr[24:20];
-reg		[`DataWidth-1:0]	imm;
+reg		[`DataWidth-1:0]		imm;
 initial imm = 0;
 
 always @(*)

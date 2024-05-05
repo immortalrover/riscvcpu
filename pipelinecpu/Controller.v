@@ -2,12 +2,10 @@
 module Controller (
 	input														clk, reset,
 	input				[`StateWidth-1:0]		state, // StateWidth = 4
-
 	input				[`Func3Width-1:0]		func3, // Func3Width = 3
 	input				[`DataWidth-1:0]		imm, regReadData1, aluO, // DataWidth = 32
 	input				[`AddrWidth-1:0]		PC, // AddrWidth = 32
 	input				[1:0]								forwordB,
-
 	output	reg [`DataWidth-1:0]		data,
 	output	reg											regWriteEnable,
 	output	reg	[`DataWidth-1:0]		regWriteData,

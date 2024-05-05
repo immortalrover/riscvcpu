@@ -1,33 +1,28 @@
 `include "Defines.v"
 module Execute (
-	input														clk,
-	input														reset,
-	input				[`OpcodeWidth-1:0]	opcode, // OpcodeWidth = 7
-	input				[`Func3Width-1:0]		func3, // Func3Width = 3
-	input				[`Func7Width-1:0]		func7, // Func7Width = 7
-	input				[`RegNumWidth-1:0]	regNum0, // RegNumWidth = 5
-	input				[`RegNumWidth-1:0]	regNum1,
-	input				[`RegNumWidth-1:0]	regWriteNum,
-	input				[`DataWidth-1:0]		imm, // DataWidth = 32
-	input				[`AddrWidth-1:0]		PC, // AddrWidth = 32
-	output													pcWriteEnable,
-	output			[`DataWidth-1:0]		pcWriteData
+	input												clk, reset,
+	input		[`OpcodeWidth-1:0]	opcode, // OpcodeWidth = 7
+	input		[`Func3Width-1:0]		func3, // Func3Width = 3
+	input		[`Func7Width-1:0]		func7, // Func7Width = 7
+	input		[`RegNumWidth-1:0]	regNum0, regNum1, regWriteNum, // RegNumWidth = 5
+	input		[`DataWidth-1:0]		imm, // DataWidth = 32
+	input		[`AddrWidth-1:0]		PC, // AddrWidth = 32
+	output											pcWriteEnable,
+	output	[`DataWidth-1:0]		pcWriteData
 );
 
 reg		[`ALUOpWidth-1:0]	aluOp; // ALUOpWidth = 5
-reg		[`DataWidth-1:0]	aluX;
-reg		[`DataWidth-1:0]	aluY;
+reg		[`DataWidth-1:0]	aluX, aluY;
 wire	[`DataWidth-1:0]	aluO;
-reg		[`StateWidth-1:0] state;
-wire	[`DataWidth-1:0]	regReadData0;
-wire	[`DataWidth-1:0]	regReadData1;
+wire	[`DataWidth-1:0]	regReadData0, regReadData1;
 wire										regWriteEnable;
-wire		[`DataWidth-1:0]	regWriteData;
+wire	[`DataWidth-1:0]	regWriteData;
 reg		[`AddrWidth-1:0]	memAddr; // AddrWidth = 32
 wire										memReadEnable;
 wire	[`DataWidth-1:0]	memReadData;
 wire										memWriteEnable;
 reg		[`DataWidth-1:0]	memWriteData;
+reg		[`StateWidth-1:0] state;
 
 always @(*)
 begin
@@ -52,10 +47,8 @@ begin
 				6: aluOp		=	`OR; // or
 				7: aluOp		=	`AND; // and
 			endcase
-
 			aluX					=	regReadData0;
 			aluY					=	regReadData1;
-
 			state					=	`RegWrite;
 		end
 		7'b0010011: // FMT I
@@ -70,10 +63,8 @@ begin
 				6: aluOp		=	`OR; // ori
 				7: aluOp		=	`AND; // andi
 			endcase
-
 			aluX					=	regReadData0;
 			aluY					=	imm;
-
 			state					=	`RegWrite;
 		end
 		7'b0000011: // FMT I lb lh lw lbu lhu
@@ -81,7 +72,6 @@ begin
 			aluX					=	regReadData0;
 			aluY					=	imm;
 			aluOp					=	`ADD;
-
 			state					=	`MemReadRegWrite;
 		end
 		7'b0100011: // FMT S sb sh sw
@@ -89,7 +79,6 @@ begin
 			aluX					=	regReadData0;
 			aluY					=	imm;
 			aluOp					=	`ADD;
-			
 			state					=	`MemWrite;
 		end
 		7'b1100011: // FMT B
@@ -104,7 +93,6 @@ begin
 			endcase
 			aluX					=	regReadData0;
 			aluY					=	regReadData1;
-
 			state					=	`PCSelectWrite;
 		end
 		7'b1101111: // FMT J jal
@@ -112,7 +100,6 @@ begin
 			aluX					=	PC;
 			aluY					=	imm;
 			aluOp					=	`ADD;
-
 			state					=	`PCWrite;
 		end
 		7'b1100111: // FMT I jalr
@@ -120,7 +107,6 @@ begin
 			aluX					=	regReadData0;
 			aluY					=	imm;
 			aluOp					=	`ADD;
-			
 			state					=	`PCWrite;
 		end
 		7'b0110111: // FMT U lui
@@ -132,7 +118,6 @@ begin
 			aluX					=	PC;
 			aluY					=	imm;
 			aluOp					=	`ADD;
-
 			state					=	`RegWrite;
 		end
 		default: state	= `IDLE;

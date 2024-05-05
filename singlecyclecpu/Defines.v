@@ -10,12 +10,6 @@
 `define StateWidth										3
 `define PCOpWidth											2
 
-// PC
-`define PCAdd4												0
-`define PCAddImm											1
-`define PCSetImm											2
-`define PCClear												3
-
 // States
 `define IDLE													0
 `define RegWrite											1

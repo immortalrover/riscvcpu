@@ -1,8 +1,7 @@
 `include "Defines.v"
 module ALU (
-  input       [3:0]							aluOp,
-  input       [`DataWidth-1:0]  aluX, // DataWidth = 32
-  input       [`DataWidth-1:0]  aluY,
+  input       [`ALUOpWidth-1:0]	aluOp, // ALUOpWidth = 4
+  input       [`DataWidth-1:0]  aluX, aluY, // DataWidth = 32
   output	reg	[`DataWidth-1:0]  aluO
 );
 

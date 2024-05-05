@@ -2,7 +2,6 @@
 module Forward (
 	input														clk,
 	input				[`RegNumWidth-1:0]	regReadNum0, regReadNum1, regWriteNum, // RegNumWidth = 5
-
 	input														flush,
 	output	reg [1:0]								forwardA, forwardB
 );

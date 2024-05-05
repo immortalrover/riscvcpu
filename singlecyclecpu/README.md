@@ -24,38 +24,3 @@
 这样可以避免出现bug的时候，无从下手debug的窘境。
 
 主要就是从易到难。
-
-## 简单的模块
-
-以下这些模块对整个项目来说难度不高，对新手友好。
-
--   InstrMem：存储待运行指令的一个地方，需要读取外部文件，根据传入的地址读取相应的指令。
--   RegsFile：这个文件是一个寄存器堆，需要根据寄存器数字读写数据。
--   DataMem：存储数据的一个地方，实现的功能主要是模仿硬盘，根据传入的地址读写相应的数据。
--   ALU：算术运算单元，需要根据不同的指令进行不同的二元运算。
--   ProgramCounter：负责PC
-
-### 测试方法
-
-您可以根据您的需求修改Makefile，包括但不限于在SOURCES_SELECT中填写对应的文件名、修改成您的verilog编译器、修改成您的仿真环境。
-
-可以通过单独测试的模块：
-
--   InstrMem.v tb/InstrMem_tb.v
--   RegsFile.v tb/RegsFile_tb.v
--   DataMem.v tb/DataMem_tb.v
--   ALU.v tb/ALU_tb.v Defines.v
--   ProgramCounter.v tb/ProgramCounter_tb.v Defines.v
-
-## 复杂的模块
-
--   Breakdown：负责分解32位长的指令
--   Controller：负责调度CPU的状态
--   Decode：管理每个指令应该做的事情
--   CPU：最终成品
-
-如果ProgramCounter tb/ProgramCounter_tb.v写到最后
-
-## 完整流程
-
-CPU(调度模块，一个完全没有什么用的顶层模块) => InstrMem(取出指令) => Breakdown(分解指令) => Decode(分配对应指令的行为) => RegsFile(可选的，取寄存器里面的值) => ALU(计算) => Controller(控制CPU的状态) => DataMem(可选的，结果写进内存) => ProgramCounter(写入PC)

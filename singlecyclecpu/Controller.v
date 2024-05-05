@@ -1,19 +1,14 @@
 `include "Defines.v"
 module Controller (
-	input								clk,
-	input								reset,
-	input		[`StateWidth-1:0]		state, // StateWidth = 4
-	
-	input		[`Func3Width-1:0]		func3, // Func3Width = 3
-	input		[`DataWidth-1:0]		imm, // DataWidth = 32
-	input		[`DataWidth-1:0]		regReadData1,
-	input		[`DataWidth-1:0]		aluO,
-	input		[`DataWidth-1:0]		PC,
-
-	output	reg					regWriteEnable,
-	output	reg	[`DataWidth-1:0]	regWriteData,
-	output	reg					pcWriteEnable,
-	output	reg	[`DataWidth-1:0]				pcWriteData
+	input														clk, reset,
+	input				[`StateWidth-1:0]		state, // StateWidth = 4
+	input				[`Func3Width-1:0]		func3, // Func3Width = 3
+	input				[`DataWidth-1:0]		imm, regReadData1, aluO, // DataWidth = 32
+	input				[`AddrWidth-1:0]		PC, // AddrWidth = 32
+	output	reg											regWriteEnable,
+	output	reg	[`DataWidth-1:0]		regWriteData,
+	output	reg											pcWriteEnable,
+	output	reg	[`DataWidth-1:0]		pcWriteData
 );
 
 reg   [`AddrWidth-1:0]    memAddr;
@@ -102,5 +97,6 @@ begin
     end
 	endcase
 end
+
 DataMem mem(clk, memAddr, memReadData, memWriteEnable, memWriteData, PC, func3);
 endmodule

@@ -9,7 +9,9 @@ module Controller (
 	input				[`DataWidth-1:0]		regReadData1,
 	input				[`DataWidth-1:0]		aluO,
 	input				[`DataWidth-1:0]		PC,
+	input				[1:0]									forwordB,
 
+	output	reg [`DataWidth-1:0]		data,
 	output	reg											regWriteEnable,
 	output	reg	[`DataWidth-1:0]		regWriteData,
 	output	reg											pcWriteEnable,
@@ -22,7 +24,12 @@ reg		[`AddrWidth-1:0]		memAddr;
 wire	[`DataWidth-1:0]		memReadData;
 reg												memWriteEnable;
 reg		[`DataWidth-1:0]		memWriteData;
+reg		[`AddrWidth-1:0]		Addr[1:0];
 
+reg [`DataWidth-1:0] data1;
+reg [`DataWidth-1:0] data2;
+
+initial pcWriteData = 0;
 initial pcWriteEnable = 0;
 always @(*) 
 begin
@@ -52,7 +59,7 @@ begin
 		`MemReadRegWrite:
 		begin
 			memAddr					= aluO;
-			regWriteData		= memReadData;
+			regWriteData		= data1;
 			regWriteEnable	=	1;
 			memWriteEnable	=	0;
 			memWriteData		=	0;
@@ -61,7 +68,7 @@ begin
 		`MemWrite:
 		begin
 			memAddr					=	aluO;
-			memWriteData		= regReadData1;
+			memWriteData		= data2;
 			memWriteEnable	=	1;
 			regWriteData		= 0;
 			regWriteEnable	=	0;
@@ -97,6 +104,10 @@ begin
 			pcWriteEnable		= 0;
 		end
 	endcase
+	case (state)
+		`RegWrite, `MemReadRegWrite, `PCWrite, `LuiRegWrite:	data = regWriteData;
+		`MemWrite: data = memWriteData;
+	endcase
 	pcData[3] = PC;
 end
 
@@ -105,6 +116,8 @@ begin
 	pcData[2] <= pcData[3];
 	pcData[1] <= pcData[2];
 	pcData[0] <= pcData[1];
+	data1 <= forwordB ? data : memReadData;
+  data2 <= forwordB ? data : regReadData1;
 end
 DataMem mem(clk, memAddr, memReadData, memWriteEnable, memWriteData, PC, func3);
 

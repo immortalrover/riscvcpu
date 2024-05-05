@@ -11,8 +11,9 @@ wire	[`InstrWidth-1:0]	instr; // InstrWidth = 32
 wire	[`AddrWidth-1:0]	pcWriteData;
 wire										pcWriteEnable;
 wire										hazard;
+wire										flush;
 
-initial pcData[4] = 0;
+initial pcData[4] = -4;
 
 always @(*)
 begin
@@ -39,5 +40,7 @@ wire [`InstrWidth-1:0] test1 = pcData[4];
 
 InstrMem instrMem(pcData[4], instr);
 
-Decode ID(clk, reset, instrData[0], pcData[4], pcWriteData, pcWriteEnable, hazard);
+Decode ID(clk, reset, instrData[0], pcData[4], pcWriteData, pcWriteEnable, hazard, flush);
+
+Flush flushing(clk, pcWriteEnable, flush);
 endmodule

@@ -19,8 +19,6 @@ reg		[`AddrWidth-1:0]	memAddr;
 wire	[`DataWidth-1:0]	memReadData;
 reg											memWriteEnable;
 reg		[`DataWidth-1:0]	memWriteData;
-reg		[`DataWidth-1:0]	data1;
-reg		[`DataWidth-1:0]	data2;
 
 initial pcWriteData = 0;
 initial pcWriteEnable = 0;
@@ -54,7 +52,7 @@ begin
 		`MemReadRegWrite:
 		begin
 			memAddr					= aluO;
-			regWriteData		= data1;
+			regWriteData		= forwordB ? data : memReadData;
 			regWriteEnable	=	1;
 			memWriteEnable	=	0;
 			memWriteData		=	0;
@@ -63,7 +61,7 @@ begin
 		`MemWrite:
 		begin
 			memAddr					=	aluO;
-			memWriteData		= data2;
+			memWriteData		= forwordB ? data : regReadData1;
 			memWriteEnable	=	1;
 			regWriteData		= 0;
 			regWriteEnable	=	0;
@@ -107,8 +105,6 @@ end
 
 always @(posedge clk)
 begin
-	data1 <= forwordB ? data : memReadData;
-  data2 <= forwordB ? data : regReadData1;
 	pcData[0] <= pcData[1];
 	pcData[1] <= pcData[2];
 	pcData[2] <= pcData[3];

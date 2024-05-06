@@ -12,7 +12,7 @@ integer counter = 0;
 initial begin
 	$dumpfile("build/test.vcd");
 	$dumpvars;
-  $readmemh("tb/riscv32_sim9.dat", cpu.instrMem.RAM);
+  $readmemh("tb/riscv32_sim10.dat", cpu.instrMem.RAM);
   clk = 0;
 end
 

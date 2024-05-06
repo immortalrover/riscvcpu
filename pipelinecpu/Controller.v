@@ -1,24 +1,20 @@
 `include "Defines.v"
 module Controller (
 	input														clk, reset,
-	input				[`StateWidth-1:0]		state, // StateWidth = 4
-	input				[`Func3Width-1:0]		func3, // Func3Width = 3
-	input				[`DataWidth-1:0]		imm, regReadData1, aluO, // DataWidth = 32
-	input				[`AddrWidth-1:0]		PC, // AddrWidth = 32
 	input				[1:0]								forwordB,
-	output	reg [`DataWidth-1:0]		data,
-	output	reg											regWriteEnable,
-	output	reg	[`DataWidth-1:0]		regWriteData,
-	output	reg											pcWriteEnable,
-	output	reg	[`DataWidth-1:0]		pcWriteData
+	input				[`AddrWidth-1:0]		PC, // AddrWidth = 32
+	input				[`DataWidth-1:0]		imm, regReadData1, aluO, // DataWidth = 32
+	input				[`Func3Width-1:0]		func3, // Func3Width = 3
+	input				[`StateWidth-1:0]		state, // StateWidth = 4
+	output	reg											pcWriteEnable, regWriteEnable,
+	output	reg	[`DataWidth-1:0]		pcWriteData, regWriteData, data
 );
 
-reg		[`DataWidth-1:0]	pcData[3:0];
-// MEM
-reg		[`AddrWidth-1:0]	memAddr;
-wire	[`DataWidth-1:0]	memReadData;
 reg											memWriteEnable;
-reg		[`DataWidth-1:0]	memWriteData;
+reg		[`AddrWidth-1:0]	memAddr;
+reg		[`DataWidth-1:0]	memWriteData, pcData[3:0];
+
+wire	[`DataWidth-1:0]	memReadData;
 
 initial pcWriteData = 0;
 initial pcWriteEnable = 0;
@@ -110,5 +106,5 @@ begin
 	pcData[2] <= pcData[3];
 end
 
-DataMem mem(clk, memAddr, memReadData, memWriteEnable, memWriteData, PC, func3);
+DataMem mem(clk, memWriteEnable, PC, func3, memAddr, memWriteData, memReadData);
 endmodule

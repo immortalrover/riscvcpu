@@ -1,12 +1,10 @@
 `include "Defines.v"
 module Decode (
-	input											clk, reset,
-	input		[`InstrWidth-1:0]	instr, // InstrWidth = 32
+	input											clk, reset, flush,
 	input		[`AddrWidth-1:0]	PC, // AddrWidth = 32
-	output	[`DataWidth-1:0]	pcWriteData, // DataWidth = 32
-	output										pcWriteEnable,
-	output										hazard,
-	input											flush
+	input		[`InstrWidth-1:0]	instr, // InstrWidth = 32
+	output										hazard, pcWriteEnable,
+	output	[`DataWidth-1:0]	pcWriteData // DataWidth = 32
 );
 
 reg		[`OpcodeWidth-1:0]		opcode[1:0]; /* = instr[6:0]; */ // OpcodeWidth = 7
@@ -19,12 +17,12 @@ reg		[`DataWidth-1:0]			imm[1:0];
 
 always @(*)
 begin
-	opcode[1] = instr[6:0];
 	func3[1] = instr[14:12];
 	func7[1] = instr[31:25];
-	regWriteNum[1] = instr[11:7];
+	opcode[1] = instr[6:0];
 	regNum0[1] = instr[19:15];
 	regNum1[1] = instr[24:20];
+	regWriteNum[1] = instr[11:7];
 	case({instr[6:0]}) // opcode
 		7'b0010011, 7'b1100111, 7'b0000011:	// FMT I
 			case({instr[14:12]}) // func3
@@ -49,19 +47,14 @@ end
 always @(posedge clk)
 if(~hazard)
 begin
-	opcode[0] <= opcode[1];
 	func3[0] <= func3[1];
 	func7[0] <= func7[1];
-	regWriteNum[0] <= regWriteNum[1];
+	imm[0] <= imm[1];
+	opcode[0] <= opcode[1];
 	regNum0[0] <= regNum0[1];
 	regNum1[0] <= regNum1[1];
-	imm[0] <= imm[1];
+	regWriteNum[0] <= regWriteNum[1];
 end
 
-Execute EX(
-	clk, reset, opcode[0], func3[0],func7[0],
-	regNum0[0], regNum1[0], regWriteNum[0], imm[0],
-	PC, pcWriteData, pcWriteEnable,
-	hazard, flush
-);
+Execute EX(clk, reset, flush, PC, imm[0], func3[0], func7[0], opcode[0], regNum0[0], regNum1[0], regWriteNum[0], pcWriteEnable, pcWriteData, hazard);
 endmodule

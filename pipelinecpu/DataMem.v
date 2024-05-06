@@ -1,12 +1,11 @@
 `include "Defines.v"
 module DataMem(
-	input													clk,
-  input				[`AddrWidth-1:0]	memAddr, // AddrWidth = 32
-  output reg	[`DataWidth-1:0]	memReadData, // DataWidth = 32
-	input													memWriteEnable, // 1 => Write
-  input				[`DataWidth-1:0]	memWriteData, 
+	input													clk, memWriteEnable, // 1 => Write
 	input				[`AddrWidth-1:0]	PC, // AddrWidth = 32
-	input				[`Func3Width-1:0]	func3 // Func3Width = 3
+	input				[`Func3Width-1:0]	func3, // Func3Width = 3
+  input				[`AddrWidth-1:0]	memAddr, // AddrWidth = 32
+  input				[`DataWidth-1:0]	memWriteData, 
+  output reg	[`DataWidth-1:0]	memReadData // DataWidth = 32
 );
 
 reg  [`DataWidth-1:0] RAM[1023:0];
@@ -17,23 +16,23 @@ begin
 	case (memAddr[1:0])
 		0:
 		case (func3)
-	    0: RAM[memAddr[11:2]][7:0] = memWriteData[7:0]; // sb
-	    1: RAM[memAddr[11:2]][15:0]= memWriteData[15:0]; // sh
-	    2: RAM[memAddr[11:2]] = memWriteData; // sw
+	    0: RAM[memAddr[11:2]][7:0]	= memWriteData[7:0]; // sb
+	    1: RAM[memAddr[11:2]][15:0]	= memWriteData[15:0]; // sh
+	    2: RAM[memAddr[11:2]]				= memWriteData; // sw
 	  endcase
 		1:
 		case (func3)
 	    0: RAM[memAddr[11:2]][15:8] = memWriteData[7:0]; // sb
-	    1: RAM[memAddr[11:2]][23:8]= memWriteData[15:0]; // sh
+	    1: RAM[memAddr[11:2]][23:8]	= memWriteData[15:0]; // sh
 	  endcase
 		2:
 		case (func3)
-	    0: RAM[memAddr[11:2]][23:16] = memWriteData[7:0]; // sb
+	    0: RAM[memAddr[11:2]][23:16]= memWriteData[7:0]; // sb
 	    1: RAM[memAddr[11:2]][31:16]= memWriteData[15:0]; // sh
 	  endcase
 		3:
 		case (func3)
-	    0: RAM[memAddr[11:2]][31:24] = memWriteData[7:0]; // sb
+	    0: RAM[memAddr[11:2]][31:24]= memWriteData[7:0]; // sb
 	  endcase
 	endcase
 

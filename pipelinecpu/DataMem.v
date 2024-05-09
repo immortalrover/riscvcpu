@@ -1,6 +1,6 @@
 `include "Defines.v"
 module DataMem(
-	input													clk, memWriteEnable, // 1 => Write
+	input													clk, memWriteEnable, memReadEnable,
 	input				[`AddrWidth-1:0]	PC, // AddrWidth = 32
 	input				[`Func3Width-1:0]	func3, // Func3Width = 3
   input				[`AddrWidth-1:0]	memAddr, // AddrWidth = 32
@@ -36,6 +36,7 @@ begin
 	  endcase
 	endcase
 
+	if (memReadEnable)
 	case (memAddr[1:0])
 		0:
 		case (func3)

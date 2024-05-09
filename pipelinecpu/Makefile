@@ -29,3 +29,7 @@ show:
 	@echo "#############     Opening waveform    #############"
 	${SHOW} ${BUILD_DIR}/test.vcd
 
+show2:
+	@echo "#############     Opening waveform    #############"
+	${SHOW} ${BUILD_DIR}/*.gtkw
+

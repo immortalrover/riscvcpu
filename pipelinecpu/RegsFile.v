@@ -15,7 +15,7 @@ assign regReadData1 = (regNum1 != 0) ? regs[regNum1] : 0;
 
 integer i;
 
-initial for ( i = 0; i < 32; i=i+1) regs[i] = 0;
+initial for ( i = 0; i < 32; i=i+1) regs[i] = i + 1;
 
 always @(*) if (reset) for ( i = 0; i < 32; i=i+1) regs[i] = 0;
 always @(*) pcData[4] = PC;

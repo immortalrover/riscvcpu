@@ -7,9 +7,8 @@ module Execute (
 	input				[`Func7Width-1:0]		func7, // Func7Width = 7
 	input				[`OpcodeWidth-1:0]	opcode, // OpcodeWidth = 7
 	input				[`RegNumWidth-1:0]	regNum0, regNum1, regWriteNum, // RegNumWidth = 5
-	output													pcWriteEnable,
-	output			[`DataWidth-1:0]		pcWriteData,
-	output	reg											hazard
+	output													pcWriteEnable, memReadEnable,
+	output			[`DataWidth-1:0]		pcWriteData
 );
 
 reg												regInEnable[1:0]; // reg for regInEnable
@@ -28,9 +27,6 @@ reg		[`StateWidth-1:0]		state[1:0]; // StateWidth = 4
 wire											regWriteEnable;
 wire	[1:0]								forwardA, forwardB;
 wire	[`DataWidth-1:0]		aluO, data, regReadData0, regReadData1, regWriteData;
-
-initial hazard = 0;
-initial waithazard = 0;
 
 always @(*)
 begin
@@ -199,7 +195,6 @@ always @(posedge clk)
 begin
 	aluOut[0] <= aluOut[1];
 	func3Data[0] <= func3Data[1];
-	hazard <= waithazard;
 	immData[0] <= immData[1];
 	pcData[0] <= pcData[1];
 	pcData[1] <= pcData[2];
@@ -208,13 +203,13 @@ begin
 	regInNum[0] <= regInNum[1];
 	regInNum[1] <= regInNum[2];
 	regOutData1[0] <= regOutData1[1];
-	state[0] <= hazard ? 0 : state[1];
+	state[0] <= state[1];
 	waithazard <= 0;
 end
 
 ALU	alu(aluOp, aluX, aluY, aluO);
 
-Controller control(clk, reset, forwardB, PC, immData[0], regOutData1[0], aluOut[0], func3Data[0], state[0], pcWriteEnable, regWriteEnable, pcWriteData, regWriteData, data);
+Controller control(clk, reset, forwardB, PC, immData[0], regOutData1[0], aluOut[0], func3Data[0], state[0], pcWriteEnable, regWriteEnable, memReadEnable,pcWriteData, regWriteData, data);
 
 Forward Forwarding(clk, flush, regNum0, regNum1, regWriteNum, forwardA, forwardB);
 

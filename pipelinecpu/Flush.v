@@ -3,9 +3,9 @@ module Flush (
 	output		flush
 );
 
-assign flush = i > 0;
-
 integer i = 0;
+
+assign flush = i > 0;
 
 always @(posedge pcWriteEnable) if (pcWriteEnable) i = 3;
 

@@ -194,24 +194,24 @@ end
 
 always @(posedge clk)
 begin
-	aluOut[0] <= aluOut[1];
-	func3Data[0] <= func3Data[1];
-	immData[0] <= immData[1];
-	pcData[0] <= pcData[1];
-	pcData[1] <= pcData[2];
-	regInData[0] <= regInData[1];
-	regInEnable[0] <= regInEnable[1];
-	regInNum[0] <= regInNum[1];
-	regInNum[1] <= regInNum[2];
-	regOutData1[0] <= regOutData1[1];
-	state[0] <= state[1];
+	aluOut[0] <= reset ? 0 : aluOut[1];
+	func3Data[0] <= reset ? 0 : func3Data[1];
+	immData[0] <= reset ? 0 : immData[1];
+	pcData[0] <= reset ? 0 : pcData[1];
+	pcData[1] <= reset ? 0 : pcData[2];
+	regInData[0] <= reset ? 0 : regInData[1];
+	regInEnable[0] <= reset ? 0 : regInEnable[1];
+	regInNum[0] <= reset ? 0 : regInNum[1];
+	regInNum[1] <= reset ? 0 : regInNum[2];
+	regOutData1[0] <= reset ? 0 : regOutData1[1];
+	state[0] <= reset ? 0 : state[1];
 end
 
 ALU	alu(aluOp, aluX, aluY, aluO);
 
 Controller control(clk, reset, forwardB, PC, immData[0], regOutData1[0], aluOut[0], func3Data[0], state[0], pcWriteEnable, regWriteEnable, pcWriteData, regWriteData, data);
 
-Forward Forwarding(clk, flush, regNum0, regNum1, regWriteNum, forwardA, forwardB);
+Forward Forwarding(clk, reset, flush, regNum0, regNum1, regWriteNum, forwardA, forwardB);
 
 RegsFile RF(PC, clk, reset, regInEnable[0], regInData[0], regNum0, regNum1, regInNum[0], regReadData0, regReadData1);
 endmodule

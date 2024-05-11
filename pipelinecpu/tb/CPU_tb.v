@@ -14,6 +14,7 @@ initial begin
 	$dumpvars;
   $readmemh("tb/riscv32_sim9.dat", cpu.U_imem.RAM);
   clk = 0;
+	reset = 0;
 end
 
 always begin

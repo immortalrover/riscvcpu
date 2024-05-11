@@ -105,5 +105,5 @@ begin
 	pcData[1] <= pcData[2];
 end
 
-DataMem mem(clk, memWriteEnable, PC, func3, memAddr, memWriteData, memReadData);
+DataMem mem(memWriteEnable, PC, func3, memAddr, memWriteData, memReadData);
 endmodule

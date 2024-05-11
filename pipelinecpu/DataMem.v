@@ -1,6 +1,6 @@
 `include "Defines.v"
 module DataMem(
-	input													clk, memWriteEnable,
+	input													memWriteEnable,
 	input				[`AddrWidth-1:0]	PC, // AddrWidth = 32
 	input				[`Func3Width-1:0]	func3, // Func3Width = 3
   input				[`AddrWidth-1:0]	memAddr, // AddrWidth = 32

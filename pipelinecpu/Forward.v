@@ -1,6 +1,6 @@
 `include "Defines.v"
 module Forward (
-	input														clk, flush,
+	input														clk, reset, flush,
 	input				[`RegNumWidth-1:0]	regReadNum0, regReadNum1, regWriteNum, // RegNumWidth = 5
 	output	reg [1:0]								forwardA, forwardB
 );
@@ -36,8 +36,8 @@ end
 
 always @(posedge clk)
 begin
-	flushing[0] <= flushing[1];
-	regsWriteNum[1] <= regsWriteNum[0];
-	regsWriteNum[2] <= regsWriteNum[1];
+	flushing[0] <= reset ? 0 : flushing[1];
+	regsWriteNum[1] <= reset ? 0 : regsWriteNum[0];
+	regsWriteNum[2] <= reset ? 0 : regsWriteNum[1];
 end
 endmodule

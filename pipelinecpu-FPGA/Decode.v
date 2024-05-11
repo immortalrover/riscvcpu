@@ -51,20 +51,22 @@ end
 always @(posedge clk)
 if(~hazard)
 begin
-	func3[0] <= func3[1];
-	func7[0] <= func7[1];
-	imm[0] <= imm[1];
-	opcode[0] <= opcode[1];
-	regNum0[0] <= regNum0[1];
-	regNum1[0] <= regNum1[1];
-	regWriteNum[0] <= regWriteNum[1];
+	func3[0] <= reset ? 0 : func3[1];
+	func7[0] <= reset ? 0 : func7[1];
+	imm[0] <= reset ? 0 : imm[1];
+	opcode[0] <= reset ? 0 : opcode[1];
+	regNum0[0] <= reset ? 0 : regNum0[1];
+	regNum1[0] <= reset ? 0 : regNum1[1];
+	regWriteNum[0] <= reset ? 0 : regWriteNum[1];
 end
 
-Execute EX(clk, reset, flush, PC, imm[0], func3[0], func7[0], opcode[0], regNum0[0], regNum1[0], regWriteNum[0], pcWriteEnable, pcWriteData, hazard,
+Execute EX(clk, reset, flush, hazard, PC, imm[0], func3[0], func7[0], opcode[0], regNum0[0], regNum1[0], regWriteNum[0], pcWriteEnable, memReadEnable, pcWriteData,
 	regWatchNum,
 	memWatchAddr,
 	regWatchData,
 	aluWatchO,
 	memWatchData
 );
+
+Hazard Hazarding(clk, reset, memReadEnable, regNum0[1], regNum1[1], regWriteNum[0], hazard);
 endmodule

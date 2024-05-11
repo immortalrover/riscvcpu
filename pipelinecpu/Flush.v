@@ -1,5 +1,5 @@
 module Flush (
-	input			clk, pcWriteEnable,
+	input			clk, reset, pcWriteEnable,
 	output		flush
 );
 
@@ -9,6 +9,10 @@ assign flush = i > 0;
 
 always @(posedge pcWriteEnable) if (pcWriteEnable) i = 3;
 
-always @(posedge clk) if (flush) i = i - 1;
+always @(posedge clk)
+begin
+	if (reset) i = 0;
+	else if (flush) i = i - 1;
+end
 
 endmodule

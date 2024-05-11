@@ -24,13 +24,13 @@ always @(posedge clk)
 begin
 	if(~hazard)
 	begin
-		instrData[0] <= instrData[1];
-		pcData[0] <= pcWriteEnable ? pcWriteData : pcData[1];
+		instrData[0] <= reset ? 0 : instrData[1];
+		pcData[0] <= reset ? 0 : pcWriteEnable ? pcWriteData : pcData[1];
 	end
 end
 InstrMem U_imem(pcData[0], instr);
 
 Decode ID(clk, reset, flush, pcData[0], instrData[0], hazard, pcWriteEnable, pcWriteData);
 
-Flush flushing(clk, pcWriteEnable, flush);
+Flush flushing(clk, reset, pcWriteEnable, flush);
 endmodule

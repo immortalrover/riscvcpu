@@ -1,0 +1,115 @@
+[*]
+[*] GTKWave Analyzer v3.3.118 (w)1999-2023 BSI
+[*] Sat May 11 09:27:42 2024
+[*]
+[dumpfile] "/home/rover/GitHub/riscvcpu/pipelinecpu/build/test.vcd"
+[dumpfile_mtime] "Sat May 11 09:27:09 2024"
+[dumpfile_size] 85697
+[savefile] "/home/rover/GitHub/riscvcpu/pipelinecpu/build/test.gtkw"
+[timestart] 2578
+[size] 1876 989
+[pos] -1 -1
+*-10.342721 4155 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] CPU_tb.
+[treeopen] CPU_tb.cpu.
+[treeopen] CPU_tb.cpu.ID.
+[treeopen] CPU_tb.cpu.ID.EX.
+[sst_width] 273
+[signals_width] 247
+[sst_expanded] 1
+[sst_vpaned_height] 293
+@28
+CPU_tb.cpu.ID.Hazarding.clk
+@800200
+-IF
+@22
+CPU_tb.cpu.ID.PC[31:0]
+@1000200
+-IF
+@800200
+-ID
+@22
+CPU_tb.cpu.ID.instr[31:0]
+@1000200
+-ID
+@800200
+-EX
+@28
+CPU_tb.cpu.ID.EX.opcode[6:0]
+@22
+CPU_tb.cpu.ID.EX.alu.aluX[31:0]
+CPU_tb.cpu.ID.EX.alu.aluY[31:0]
+CPU_tb.cpu.ID.EX.alu.aluO[31:0]
+@1000200
+-EX
+@800200
+-Mem
+@22
+CPU_tb.cpu.ID.EX.control.memAddr[31:0]
+CPU_tb.cpu.ID.EX.control.memReadData[31:0]
+@c00022
+CPU_tb.cpu.ID.EX.control.memWriteData[31:0]
+@28
+(0)CPU_tb.cpu.ID.EX.control.memWriteData[31:0]
+(1)CPU_tb.cpu.ID.EX.control.memWriteData[31:0]
+(2)CPU_tb.cpu.ID.EX.control.memWriteData[31:0]
+(3)CPU_tb.cpu.ID.EX.control.memWriteData[31:0]
+(4)CPU_tb.cpu.ID.EX.control.memWriteData[31:0]
+(5)CPU_tb.cpu.ID.EX.control.memWriteData[31:0]
+(6)CPU_tb.cpu.ID.EX.control.memWriteData[31:0]
+(7)CPU_tb.cpu.ID.EX.control.memWriteData[31:0]
+(8)CPU_tb.cpu.ID.EX.control.memWriteData[31:0]
+(9)CPU_tb.cpu.ID.EX.control.memWriteData[31:0]
+(10)CPU_tb.cpu.ID.EX.control.memWriteData[31:0]
+(11)CPU_tb.cpu.ID.EX.control.memWriteData[31:0]
+(12)CPU_tb.cpu.ID.EX.control.memWriteData[31:0]
+(13)CPU_tb.cpu.ID.EX.control.memWriteData[31:0]
+(14)CPU_tb.cpu.ID.EX.control.memWriteData[31:0]
+(15)CPU_tb.cpu.ID.EX.control.memWriteData[31:0]
+(16)CPU_tb.cpu.ID.EX.control.memWriteData[31:0]
+(17)CPU_tb.cpu.ID.EX.control.memWriteData[31:0]
+(18)CPU_tb.cpu.ID.EX.control.memWriteData[31:0]
+(19)CPU_tb.cpu.ID.EX.control.memWriteData[31:0]
+(20)CPU_tb.cpu.ID.EX.control.memWriteData[31:0]
+(21)CPU_tb.cpu.ID.EX.control.memWriteData[31:0]
+(22)CPU_tb.cpu.ID.EX.control.memWriteData[31:0]
+(23)CPU_tb.cpu.ID.EX.control.memWriteData[31:0]
+(24)CPU_tb.cpu.ID.EX.control.memWriteData[31:0]
+(25)CPU_tb.cpu.ID.EX.control.memWriteData[31:0]
+(26)CPU_tb.cpu.ID.EX.control.memWriteData[31:0]
+(27)CPU_tb.cpu.ID.EX.control.memWriteData[31:0]
+(28)CPU_tb.cpu.ID.EX.control.memWriteData[31:0]
+(29)CPU_tb.cpu.ID.EX.control.memWriteData[31:0]
+(30)CPU_tb.cpu.ID.EX.control.memWriteData[31:0]
+(31)CPU_tb.cpu.ID.EX.control.memWriteData[31:0]
+@1401200
+-group_end
+@22
+CPU_tb.cpu.ID.EX.control.regWriteData[31:0]
+@1000200
+-Mem
+@800200
+-WB
+@22
+CPU_tb.cpu.ID.EX.RF.regWriteData[31:0]
+@28
+CPU_tb.cpu.ID.EX.RF.regWriteEnable
+@24
+CPU_tb.cpu.ID.EX.RF.regWriteNum[4:0]
+@1000200
+-WB
+@28
+CPU_tb.cpu.ID.Hazarding.hazard
+CPU_tb.cpu.ID.flush
+CPU_tb.cpu.ID.EX.Forwarding.forwardA[1:0]
+CPU_tb.cpu.ID.EX.Forwarding.forwardB[1:0]
+@22
+CPU_tb.cpu.ID.EX.Forwarding.regReadNum0[4:0]
+CPU_tb.cpu.ID.EX.Forwarding.regReadNum1[4:0]
+CPU_tb.cpu.ID.EX.regReadData1[31:0]
+@28
+CPU_tb.cpu.ID.EX.control.state[2:0]
+@23
+CPU_tb.cpu.ID.EX.control.data[31:0]
+[pattern_trace] 1
+[pattern_trace] 0

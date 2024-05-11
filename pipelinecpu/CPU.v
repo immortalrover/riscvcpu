@@ -1,5 +1,5 @@
 `include "Defines.v"
-module CPU (
+module xgriscv_pipeline (
 	input													clk, reset,
 	output	reg [`AddrWidth-1:0]	PC // AddrWidth = 32
 );
@@ -28,7 +28,7 @@ begin
 		pcData[0] <= pcWriteEnable ? pcWriteData : pcData[1];
 	end
 end
-InstrMem instrMem(pcData[0], instr);
+InstrMem U_imem(pcData[0], instr);
 
 Decode ID(clk, reset, flush, pcData[0], instrData[0], hazard, pcWriteEnable, pcWriteData);
 

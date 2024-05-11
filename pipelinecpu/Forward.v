@@ -36,8 +36,8 @@ end
 
 always @(posedge clk)
 begin
-	flushing[0] <= reset ? 0 : flushing[1];
-	regsWriteNum[1] <= reset ? 0 : regsWriteNum[0];
-	regsWriteNum[2] <= reset ? 0 : regsWriteNum[1];
+	flushing[0] <=  flushing[1];
+	regsWriteNum[1] <=  regsWriteNum[0];
+	regsWriteNum[2] <=  regsWriteNum[1];
 end
 endmodule

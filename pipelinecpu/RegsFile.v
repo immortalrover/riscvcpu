@@ -29,9 +29,9 @@ end
 
 always @(posedge clk)
 begin
-	pcData[0] <= reset ? 0 : pcData[1];
-	pcData[1] <= reset ? 0 : pcData[2];
-	pcData[2] <= reset ? 0 : pcData[3];
+	pcData[0] <=  pcData[1];
+	pcData[1] <=  pcData[2];
+	pcData[2] <=  pcData[3];
 end
 
 endmodule

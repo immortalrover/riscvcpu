@@ -209,7 +209,7 @@ end
 
 ALU	alu(aluOp, aluX, aluY, aluO);
 
-Controller control(clk, reset, forwardB, PC, immData[0], regOutData1[0], aluOut[0], func3Data[0], state[0], pcWriteEnable, regWriteEnable, pcWriteData, regWriteData, data);
+Controller Control(clk, reset, forwardB, PC, immData[0], regOutData1[0], aluOut[0], func3Data[0], state[0], pcWriteEnable, regWriteEnable, pcWriteData, regWriteData, data);
 
 Forward Forwarding(clk, reset, flush, regNum0, regNum1, regWriteNum, forwardA, forwardB);
 

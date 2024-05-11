@@ -5,14 +5,14 @@ reg					clk;
 reg					reset;
 wire[31:0]	pc;
     
-CPU cpu(clk, reset, pc);
+xgriscv_pipeline cpu(clk, reset, pc);
 
 integer counter = 0;
 
 initial begin
 	$dumpfile("build/test.vcd");
 	$dumpvars;
-  $readmemh("tb/riscv32_sim9.dat", cpu.instrMem.RAM);
+  $readmemh("tb/riscv32_sim9.dat", cpu.U_imem.RAM);
   clk = 0;
 end
 

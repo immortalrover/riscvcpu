@@ -55,8 +55,15 @@ begin
 	regNum1[0] <= regNum1[1];
 	regWriteNum[0] <= regWriteNum[1];
 end
+else 
+begin
+	opcode[0] <= 7'b0110011;
+	regNum0[0] <= 0;
+	regNum1[0] <= 0;
+	regWriteNum[0] <= 0;
+end
 
-Execute EX(clk, reset, flush, PC, imm[0], func3[0], func7[0], opcode[0], regNum0[0], regNum1[0], regWriteNum[0], pcWriteEnable, memReadEnable, pcWriteData);
+Execute EX(clk, reset, flush, hazard, PC, imm[0], func3[0], func7[0], opcode[0], regNum0[0], regNum1[0], regWriteNum[0], pcWriteEnable, memReadEnable, pcWriteData);
 
-Hazard Hazarding(clk, reset, memReadEnable, regNum0[0], regNum1[0], regWriteNum[0], hazard);
+Hazard Hazarding(clk, reset, memReadEnable, regNum0[1], regNum1[1], regWriteNum[0], hazard);
 endmodule

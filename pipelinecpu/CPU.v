@@ -21,12 +21,13 @@ begin
 end
 
 always @(posedge clk)
-if(~hazard)
 begin
-	instrData[0] <= instrData[1];
-	pcData[0] <= pcWriteEnable ? pcWriteData : pcData[1];
+	if(~hazard)
+	begin
+		instrData[0] <= instrData[1];
+		pcData[0] <= pcWriteEnable ? pcWriteData : pcData[1];
+	end
 end
-
 InstrMem instrMem(pcData[0], instr);
 
 Decode ID(clk, reset, flush, pcData[0], instrData[0], hazard, pcWriteEnable, pcWriteData);

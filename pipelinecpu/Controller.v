@@ -6,13 +6,13 @@ module Controller (
 	input				[`DataWidth-1:0]		imm, regReadData1, aluO, // DataWidth = 32
 	input				[`Func3Width-1:0]		func3, // Func3Width = 3
 	input				[`StateWidth-1:0]		state, // StateWidth = 4
-	output	reg											pcWriteEnable, regWriteEnable, memReadEnable,
+	output	reg											pcWriteEnable, regWriteEnable,
 	output	reg	[`DataWidth-1:0]		pcWriteData, regWriteData, data
 );
 
 reg											memWriteEnable;
 reg		[`AddrWidth-1:0]	memAddr;
-reg		[`DataWidth-1:0]	memWriteData, pcData[3:0];
+reg		[`DataWidth-1:0]	memWriteData, pcData[2:0];
 
 wire	[`DataWidth-1:0]	memReadData;
 
@@ -21,7 +21,7 @@ initial pcWriteEnable = 0;
 
 always @(*) 
 begin
-	pcData[3] = PC;
+	pcData[2] = PC;
 	if (reset) 
 	begin
 		pcWriteEnable			= 1;
@@ -34,7 +34,6 @@ begin
 			regWriteData		= 0;
 			regWriteEnable	=	0;
 			memWriteEnable	=	0;
-			memReadEnable		= 0;
 			memWriteData		=	0;
 			pcWriteEnable		= 0;
 		end
@@ -43,14 +42,12 @@ begin
 			regWriteData		= aluO;
 			regWriteEnable	=	1;
 			memWriteEnable	=	0;
-			memReadEnable		= 0;
 			memWriteData		=	0;
 			pcWriteEnable		= 0;
 		end	
 		`MemReadRegWrite:
 		begin
 			memAddr					= aluO;
-			memReadEnable		= 1;
 			regWriteData		= forwordB[0] ? data : memReadData;
 			regWriteEnable	=	1;
 			memWriteEnable	=	0;
@@ -60,9 +57,8 @@ begin
 		`MemWrite:
 		begin
 			memAddr					=	aluO;
-			memWriteData		= forwordB ? data : regReadData1;
+			memWriteData		= regReadData1; // forwordB ? data : 
 			memWriteEnable	=	1;
-			memReadEnable		= 0;
 			regWriteData		= 0;
 			regWriteEnable	=	0;
 			pcWriteEnable		= 0;
@@ -72,22 +68,20 @@ begin
 			if (aluO)
 			begin
 				pcWriteEnable		= 1;
-				pcWriteData			=	pcData[0] + imm;
+				pcWriteData			=	pcData[0] + imm - 4;
 			end
 			regWriteData		= 0;
 			regWriteEnable	=	0;
 			memWriteEnable	=	0;
-			memReadEnable		= 0;
 			memWriteData		=	0;
 		end
 		`PCWrite:
 		begin
 			pcWriteEnable		= 1;
 			pcWriteData			=	aluO;
-			regWriteData		=	pcData[1];
+			regWriteData		=	pcData[0];
 			regWriteEnable	=	1;
 			memWriteEnable	=	0;
-			memReadEnable		= 0;
 			memWriteData		=	0;
 		end
 		`LuiRegWrite:
@@ -95,7 +89,6 @@ begin
 			regWriteData		= imm;
 			regWriteEnable	= 1;
 			memWriteEnable	=	0;
-			memReadEnable		= 0;
 			memWriteData		=	0;
 			pcWriteEnable		= 0;
 		end
@@ -110,8 +103,7 @@ always @(posedge clk)
 begin
 	pcData[0] <= pcData[1];
 	pcData[1] <= pcData[2];
-	pcData[2] <= pcData[3];
 end
 
-DataMem mem(clk, memWriteEnable, memReadEnable, PC, func3, memAddr, memWriteData, memReadData);
+DataMem mem(clk, memWriteEnable, PC, func3, memAddr, memWriteData, memReadData);
 endmodule

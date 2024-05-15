@@ -28,7 +28,6 @@ always @(negedge clk)
 if (regWriteEnable && regWriteNum != 0)
 begin
   regs[regWriteNum] <= regWriteData;
-  $display("pc = %h: x%d = %h", pcData[`AddrWidth-1:0], regWriteNum, regWriteData);
 end
 
 always @(posedge clk)

@@ -28,7 +28,7 @@ begin
 		4'b0001:displayData = memWatchData;
 		4'b0010:displayData = aluWatchO;
 		4'b0100:displayData = regWatchData;
-		4'b1000:displayData = instrData[`InstrWidth-1:0];
+		4'b1000:displayData = instr;
 		default:displayData = 0;
 	endcase
 	if (regWatchNum == 32) regWatchNum = 0;

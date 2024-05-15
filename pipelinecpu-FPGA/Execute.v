@@ -219,5 +219,5 @@ Controller control(clk, reset, forwardB, pcData, immData[`DataWidth-1:0], regOut
 
 Forward Forwarding(clk, reset, flush, regNum0, regNum1, regWriteNum, forwardA, forwardB);
 
-RegsFile RF(PC, clk, reset, regInEnable[0], regInData[`DataWidth-1:0], regNum0, regNum1, regInNum[`RegNumWidth-1:0], regReadData0, regReadData1, regWatchNum, regWatchData);
+RegsFile RF(clk, reset, regInEnable[0], regInData[`DataWidth-1:0], regNum0, regNum1, regInNum[`RegNumWidth-1:0], regReadData0, regReadData1, regWatchNum, regWatchData);
 endmodule

@@ -215,7 +215,7 @@ end
 
 ALU	alu(aluOp, aluX, aluY, aluO);
 
-Controller control(clk, reset, forwardB, PC, immData[`DataWidth-1:0], regOutData1[`DataWidth-1:0], aluOut[`DataWidth-1:0], func3Data[`Func3Width-1:0], state[`StateWidth-1:0], pcWriteEnable, regWriteEnable, pcWriteData, regWriteData, data, memWatchAddr, memWatchData);
+Controller control(clk, reset, forwardB, pcData, immData[`DataWidth-1:0], regOutData1[`DataWidth-1:0], aluOut[`DataWidth-1:0], func3Data[`Func3Width-1:0], state[`StateWidth-1:0], pcWriteEnable, regWriteEnable, pcWriteData, regWriteData, data, memWatchAddr, memWatchData);
 
 Forward Forwarding(clk, reset, flush, regNum0, regNum1, regWriteNum, forwardA, forwardB);
 

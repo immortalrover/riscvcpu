@@ -1,14 +1,13 @@
 `include "Defines.v"
 module DataMem(
 	input													memWriteEnable, // 1 => Write
-	input				[`AddrWidth-1:0]	PC, // AddrWidth = 32
 	input				[`Func3Width-1:0]	func3, // Func3Width = 3
   input				[`AddrWidth-1:0]	memAddr, // AddrWidth = 32
   input				[`DataWidth-1:0]	memWriteData, 
   output reg	[`DataWidth-1:0]	memReadData, // DataWidth = 32
 
 	input				[`AddrWidth-1:0]	memWatchAddr,
-	output	reg		[`DataWidth-1:0]	memWatchData
+	output reg	[`DataWidth-1:0]	memWatchData
 );
 
 reg  [`DataWidth-1:0] RAM[1023:0];
@@ -71,5 +70,4 @@ begin
 
 	memWatchData = RAM[memWatchAddr[11:2]];
 end
-
 endmodule

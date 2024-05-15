@@ -10,7 +10,7 @@ module RegsFile(
 	output	[`DataWidth-1:0]		regWatchData
 );
 
-reg	[`AddrWidth-1:0] pcData[4:0];
+reg	[5*`AddrWidth-1:0] pcData;
 reg [`DataWidth-1:0] regs[31:0];
 
 assign regReadData0 = (regNum0 != 0) ? regs[regNum0] : 0;
@@ -22,21 +22,21 @@ integer i;
 initial for ( i = 0; i < 32; i=i+1) regs[i] = i + 1;
 
 always @(*) if (reset) for ( i = 0; i < 32; i=i+1) regs[i] = 0;
-always @(*) pcData[4] = PC;
+always @(*) pcData[5*`AddrWidth-1:4*`AddrWidth] = PC;
 
 always @(negedge clk)
 if (regWriteEnable && regWriteNum != 0)
 begin
   regs[regWriteNum] <= regWriteData;
-  $display("pc = %h: x%d = %h", pcData[0], regWriteNum, regWriteData);
+  $display("pc = %h: x%d = %h", pcData[`AddrWidth-1:0], regWriteNum, regWriteData);
 end
 
 always @(posedge clk)
 begin
-	pcData[0] <= pcData[1];
-	pcData[1] <= pcData[2];
-	pcData[2] <= pcData[3];
-	pcData[3] <= pcData[4];
+	pcData[`AddrWidth-1:0] <= pcData[2*`AddrWidth-1:`AddrWidth];
+	pcData[2*`AddrWidth-1:`AddrWidth] <= pcData[3*`AddrWidth-1:2*`AddrWidth];
+	pcData[3*`AddrWidth-1:2*`AddrWidth] <= pcData[4*`AddrWidth-1:3*`AddrWidth];
+	pcData[4*`AddrWidth-1:3*`AddrWidth] <= pcData[5*`AddrWidth-1:4*`AddrWidth];
 end
 
 endmodule

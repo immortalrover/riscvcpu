@@ -2,7 +2,7 @@
 module Hazard (
 	input														clk, reset, memReadEnable,
 	input				[`RegNumWidth-1:0]	regNum0, regNum1, regWriteNum,
-	output	reg											hazard
+	output												hazard
 );
 
 assign hazard = memReadEnable && (regNum0 == regWriteNum || regNum1 == regWriteNum);

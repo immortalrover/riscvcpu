@@ -19,6 +19,8 @@ reg		[`RegNumWidth-1:0]		regNum0; /* = instr[19:15]; */
 reg		[`RegNumWidth-1:0]		regNum1; /* = instr[24:20]; */
 reg		[2*`DataWidth-1:0]		imm;
 
+wire												memReadEnable;
+
 always @(*)
 begin
 	case({instr[6:0]}) // opcode

@@ -5,16 +5,18 @@ module Hazard (
 	output	reg											hazard
 );
 
-reg [2:0] number;
+assign hazard = memReadEnable && (regNum0 == regWriteNum || regNum1 == regWriteNum);
 
-always @(*)
-begin
-	if (memReadEnable && (regNum0 == regWriteNum || regNum1 == regWriteNum)) number = 3;
-	hazard = number > 0;
-end
+/* reg [2:0] number; */
 
-always @(posedge clk)
-begin
-	number <= reset ? 0 : (number > 0) ? number - 1 : 0;
-end
+/* always @(*) */
+/* begin */
+/* 	if (memReadEnable && (regNum0 == regWriteNum || regNum1 == regWriteNum)) number = 3; */
+/* 	hazard = number > 0; */
+/* end */
+
+/* always @(posedge clk) */
+/* begin */
+/* 	number <= reset ? 0 : (number > 0) ? number - 1 : 0; */
+/* end */
 endmodule

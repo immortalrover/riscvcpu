@@ -23,8 +23,8 @@ always @(*)
 begin
 	PC[2*`AddrWidth-1:`AddrWidth] = PC[`AddrWidth-1:0] + 4;
 
-	if (switches[0] == 0)
-	case (switches[14:11])
+	if (sw_i[0] == 0)
+	case (sw_i[14:11])
 		4'b0001:displayData = memWatchData;
 		4'b0010:displayData = aluWatchO;
 		4'b0100:displayData = regWatchData;

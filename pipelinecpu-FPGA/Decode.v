@@ -11,22 +11,16 @@ module Decode (
 	output	[`DataWidth-1:0]	regWatchData, aluWatchO, memWatchData
 );
 
-reg		[2*`OpcodeWidth-1:0]		opcode; /* = instr[6:0]; */ // OpcodeWidth = 7
-reg		[2*`Func3Width-1:0]			func3; /* = instr[14:12]; */ // Func3Width = 3
-reg		[2*`Func7Width-1:0]			func7; /* = instr[31:25]; */ // Func7Width = 7
-reg		[2*`RegNumWidth-1:0]		regWriteNum; /* = instr[11:7]; */ // RegNumWidth = 5
-reg		[2*`RegNumWidth-1:0]		regNum0; /* = instr[19:15]; */
-reg		[2*`RegNumWidth-1:0]		regNum1; /* = instr[24:20]; */
-reg		[2*`DataWidth-1:0]			imm;
+reg		[`OpcodeWidth-1:0]		opcode; /* = instr[6:0]; */ // OpcodeWidth = 7
+reg		[`Func3Width-1:0]			func3; /* = instr[14:12]; */ // Func3Width = 3
+reg		[`Func7Width-1:0]			func7; /* = instr[31:25]; */ // Func7Width = 7
+reg		[`RegNumWidth-1:0]		regWriteNum; /* = instr[11:7]; */ // RegNumWidth = 5
+reg		[`RegNumWidth-1:0]		regNum0; /* = instr[19:15]; */
+reg		[`RegNumWidth-1:0]		regNum1; /* = instr[24:20]; */
+reg		[2*`DataWidth-1:0]		imm;
 
 always @(*)
 begin
-	func3[2*`Func3Width-1:`Func3Width] = instr[14:12];
-	func7[2*`Func7Width-1:`Func7Width] = instr[31:25];
-	opcode[2*`OpcodeWidth-1:`OpcodeWidth] = instr[6:0];
-	regNum0[2*`RegNumWidth-1:`RegNumWidth] = instr[19:15];
-	regNum1[2*`RegNumWidth-1:`RegNumWidth] = instr[24:20];
-	regWriteNum[2*`RegNumWidth-1:`RegNumWidth] = instr[11:7];
 	case({instr[6:0]}) // opcode
 		7'b0010011, 7'b1100111, 7'b0000011:	// FMT I
 			case({instr[14:12]}) // func3
@@ -51,16 +45,16 @@ end
 always @(posedge clk)
 if(~hazard)
 begin
-	func3[`Func3Width-1:0] <= reset ? 0 : func3[2*`Func3Width-1:`Func3Width];
-	func7[`Func7Width-1:0] <= reset ? 0 : func7[2*`Func7Width-1:`Func7Width];
+	func3 <= reset ? 0 : instr[14:12];
+	func7 <= reset ? 0 : instr[31:25];
 	imm[`DataWidth-1:0] <= reset ? 0 : imm[2*`DataWidth-1:`DataWidth];
-	opcode[`OpcodeWidth-1:0] <= reset ? 0 : opcode[2*`OpcodeWidth-1:`OpcodeWidth];
-	regNum0[`RegNumWidth-1:0] <= reset ? 0 : regNum0[2*`RegNumWidth-1:`RegNumWidth];
-	regNum1[`RegNumWidth-1:0] <= reset ? 0 : regNum1[2*`RegNumWidth-1:`RegNumWidth];
-	regWriteNum[`RegNumWidth-1:0] <= reset ? 0 : regWriteNum[2*`RegNumWidth-1:`RegNumWidth];
+	opcode <= reset ? 0 : instr[6:0];
+	regNum0 <= reset ? 0 : instr[19:15];
+	regNum1 <= reset ? 0 : instr[24:20];
+	regWriteNum <= reset ? 0 : instr[11:7];
 end
 
-Execute EX(clk, reset, flush, hazard, PC, imm[`DataWidth-1:0], func3[`Func3Width-1:0], func7[`Func7Width-1:0], opcode[`OpcodeWidth-1:0], regNum0[`RegNumWidth-1:0], regNum1[`RegNumWidth-1:0], regWriteNum[`RegNumWidth-1:0], pcWriteEnable, memReadEnable, pcWriteData, regWatchNum, memWatchAddr, regWatchData, aluWatchO, memWatchData);
+Execute EX(clk, reset, flush, hazard, PC, imm[`DataWidth-1:0], func3, func7, opcode, regNum0, regNum1, regWriteNum, pcWriteEnable, memReadEnable, pcWriteData, regWatchNum, memWatchAddr, regWatchData, aluWatchO, memWatchData);
 
-Hazard Hazarding(clk, reset, memReadEnable, regNum0[`RegNumWidth-1:0], regNum1[`RegNumWidth-1:0], regWriteNum[`RegNumWidth-1:0], hazard);
+Hazard Hazarding(clk, reset, memReadEnable, regNum0, regNum1, regWriteNum, hazard);
 endmodule

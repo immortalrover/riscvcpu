@@ -36,6 +36,6 @@
 `define NotEqual											4'hE
 
 // FPGA defines
-`define SwitchNum											16
-`define LEDWidth											8
+/* `define LEDWidth											8 */
+/* `define SwitchNum											16 */
 `define DisplayDataWidth							64

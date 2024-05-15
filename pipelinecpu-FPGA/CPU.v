@@ -1,35 +1,34 @@
 `include "Defines.v"
 module CPU (
-	input													clk, rstn,
-  input		[`SwitchNum-1:0]			switches, // SwitchNum = 16
-  output	[`LEDWidth-1:0]				disp_seg_o, disp_an_o	// LEDWidth = 8
+	input						clk, rstn,
+  input		[15:0]	sw_i,
+  output	[7:0]		disp_seg_o, disp_an_o
 );
 
-reg		[`AddrWidth-1:0]	pcData[1:0]; // reg for PC
-reg		[`InstrWidth-1:0]	instrData[1:0]; // reg for instr
+reg		[2*`AddrWidth-1:0]	PC; // get PC
+reg		[`InstrWidth-1:0]		instr;
 
 wire										hazard, flush, pcWriteEnable;
 wire	[`AddrWidth-1:0]	pcWriteData;
-wire	[`InstrWidth-1:0]	instr; // InstrWidth = 32
+wire	[`InstrWidth-1:0]	instrReg; // InstrWidth = 32
 
-wire	reset = ~rstn;
-reg		[31:0] clkDiv;
-wire	CPU_clk = (switches[15]) ? clkDiv[27] : clkDiv[24];
-reg		[`DisplayDataWidth-1:0]	displayData;
-reg		[`RegNumWidth-1:0] regWatchNum;
-reg		[`AddrWidth-1:0] memWatchAddr;
-wire	[`DataWidth-1:0] regWatchData, aluWatchO, memWatchData;
+reg		[31:0]									clkDiv;
+reg		[`AddrWidth-1:0]				memWatchAddr;
+reg		[`DisplayDataWidth-1:0]	displayData; // DisplayDataWidth = 64
+reg		[`RegNumWidth-1:0]			regWatchNum;
+wire										CPU_clk = (sw_i[15]) ? clkDiv[27] : clkDiv[24];
+wire										reset = ~rstn;
+wire	[`DataWidth-1:0]	regWatchData, aluWatchO, memWatchData;
 always @(*)
 begin
-	/* PC = pcData[0] - 16; */
-	instrData[1] = instr;
-	pcData[1] = pcData[0] + 4;
+	PC[2*`AddrWidth-1:`AddrWidth] = PC[`AddrWidth-1:0] + 4;
+
 	if (switches[0] == 0)
 	case (switches[14:11])
-		4'b1000:displayData = instrData[0];
-		4'b0100:displayData = regWatchData;
-		4'b0010:displayData = aluWatchO;
 		4'b0001:displayData = memWatchData;
+		4'b0010:displayData = aluWatchO;
+		4'b0100:displayData = regWatchData;
+		4'b1000:displayData = instrData[`InstrWidth-1:0];
 		default:displayData = 0;
 	endcase
 	if (regWatchNum == 32) regWatchNum = 0;
@@ -39,12 +38,12 @@ always @(posedge clk)
 begin
 	if(reset)
 	begin
-		pcData[0] <= 0;
+		PC[`AddrWidth-1:0] <= 0;
 	end else
 	if(~hazard)
 	begin
-		instrData[0] <= instrData[1];
-		pcData[0] <= pcWriteEnable ? pcWriteData : pcData[1];
+		instr <= instrReg;
+		PC[`AddrWidth-1:0] <= pcWriteEnable ? pcWriteData : PC[2*`AddrWidth-1:`AddrWidth];
 	end
 end
 
@@ -55,17 +54,11 @@ begin
 	memWatchAddr <= reset ? 0 : memWatchAddr + 4;
 end
 
-InstrMem instrMem(pcData[0], instr);
+seg7x16 u_seg7x16(clk, rstn, sw_i[0], displayData, disp_seg_o, disp_an_o);
 
-seg7x16 u_seg7x16(clk, rstn, switches[0], displayData, disp_seg_o, disp_an_o);
+InstrMem instrMem(PC[`AddrWidth-1:0], instrReg);
 
-Decode ID(clk, reset, flush, pcData[0], instrData[0], hazard, pcWriteEnable, pcWriteData,
-	regWatchNum,
-	memWatchAddr,
-	regWatchData,
-	aluWatchO,
-	memWatchData
-);
+Decode ID(clk, reset, flush, PC[`AddrWidth-1:0], instr, hazard, pcWriteEnable, pcWriteData, regWatchNum, memWatchAddr, regWatchData, aluWatchO, memWatchData);
 
 Flush flushing(clk, reset, pcWriteEnable, flush);
 endmodule

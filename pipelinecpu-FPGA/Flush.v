@@ -3,14 +3,13 @@ module Flush (
 	output		flush
 );
 
-integer i = 0;
-assign flush = i > 0;
+reg [2:0] number;
+assign flush = number > 0;
 
-always @(posedge pcWriteEnable) if (pcWriteEnable) i = 3;
+always @(posedge pcWriteEnable) number = 3;
 
 always @(posedge clk)
 begin
-	if (reset) i = 0;
-	else  if (flush) i = i - 1;
+	number <= reset ? 0 : flush ? number - 1;
 end
 endmodule

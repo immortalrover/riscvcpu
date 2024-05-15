@@ -15,12 +15,6 @@ assign regReadData0 = (regNum0 != 0) ? regs[regNum0] : 0;
 assign regReadData1 = (regNum1 != 0) ? regs[regNum1] : 0;
 assign regWatchData = (regWatchNum != 0) ? regs[regWatchNum] : 0;
 
-integer i;
-
-initial for ( i = 0; i < 32; i=i+1) regs[i] = i + 1;
-
-always @(*) if (reset) for ( i = 0; i < 32; i=i+1) regs[i] = 0;
-
 always @(negedge clk)
 if (regWriteEnable && regWriteNum != 0)
 begin

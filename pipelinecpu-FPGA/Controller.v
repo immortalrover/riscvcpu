@@ -25,6 +25,7 @@ begin
 	begin
 		pcWriteEnable			= 1;
 		pcWriteData				= 0;
+			memAddr					= 0;
 	end
 	else 
 	case (state)
@@ -35,6 +36,7 @@ begin
 			memWriteEnable	=	0;
 			memWriteData		=	0;
 			pcWriteEnable		= 0;
+			memAddr					= 0;
 		end
 		`RegWrite:
 		begin
@@ -43,6 +45,7 @@ begin
 			memWriteEnable	=	0;
 			memWriteData		=	0;
 			pcWriteEnable		= 0;
+			memAddr					= 0;
 		end	
 		`MemReadRegWrite:
 		begin
@@ -73,6 +76,7 @@ begin
 			regWriteEnable	=	0;
 			memWriteEnable	=	0;
 			memWriteData		=	0;
+			memAddr					= 0;
 		end
 		`PCWrite:
 		begin
@@ -82,6 +86,7 @@ begin
 			regWriteEnable	=	1;
 			memWriteEnable	=	0;
 			memWriteData		=	0;
+			memAddr					= 0;
 		end
 		`LuiRegWrite:
 		begin
@@ -90,6 +95,7 @@ begin
 			memWriteEnable	=	0;
 			memWriteData		=	0;
 			pcWriteEnable		= 0;
+			memAddr					= 0;
 		end
 	endcase
 	case (state)

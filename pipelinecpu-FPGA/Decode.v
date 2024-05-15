@@ -7,7 +7,7 @@ module Decode (
 	output	[`DataWidth-1:0]	pcWriteData, // DataWidth = 32
 	
 	input		[`RegNumWidth-1:0] regWatchNum,
-	input		[`AddrWidth-1:0]	 memWatchAddr,
+	input		[`MemAddrWidth-1:0]	 memWatchAddr, // MemAddrWidth = 12
 	output	[`DataWidth-1:0]	regWatchData, aluWatchO, memWatchData
 );
 

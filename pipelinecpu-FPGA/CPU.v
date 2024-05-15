@@ -13,7 +13,7 @@ wire	[`AddrWidth-1:0]	pcWriteData;
 wire	[`InstrWidth-1:0]	instrReg; // InstrWidth = 32
 
 reg		[31:0]									clkDiv;
-reg		[`AddrWidth-1:0]				memWatchAddr;
+reg		[`MemAddrWidth-1:0]				memWatchAddr;
 reg		[`DisplayDataWidth-1:0]	displayData; // DisplayDataWidth = 64
 reg		[`RegNumWidth-1:0]			regWatchNum;
 wire										CPU_clk = (sw_i[15]) ? clkDiv[27] : clkDiv[24];

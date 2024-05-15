@@ -1,6 +1,7 @@
 // Width
 `define InstrWidth										32
 `define AddrWidth											32
+`define MemAddrWidth									12
 `define DataWidth											32
 `define OpcodeWidth										7
 `define Func3Width										3

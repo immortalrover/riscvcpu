@@ -2,11 +2,11 @@
 module DataMem(
 	input													memWriteEnable, // 1 => Write
 	input				[`Func3Width-1:0]	func3, // Func3Width = 3
-  input				[`AddrWidth-1:0]	memAddr, // AddrWidth = 32
+  input				[`MemAddrWidth-1:0]	memAddr, // AddrWidth = 12
   input				[`DataWidth-1:0]	memWriteData, 
   output reg	[`DataWidth-1:0]	memReadData, // DataWidth = 32
 
-	input				[`AddrWidth-1:0]	memWatchAddr,
+	input				[`MemAddrWidth-1:0]	memWatchAddr,
 	output reg	[`DataWidth-1:0]	memWatchData
 );
 

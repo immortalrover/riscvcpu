@@ -9,7 +9,7 @@ module Controller (
 	output	reg											pcWriteEnable, regWriteEnable,
 	output	reg	[`DataWidth-1:0]		pcWriteData, regWriteData, data,
 
-	input				[`AddrWidth-1:0]		memWatchAddr,
+	input				[`MemAddrWidth-1:0]		memWatchAddr, // MemAddrWidth = 12
 	output			[`DataWidth-1:0]		memWatchData
 );
 
@@ -104,5 +104,5 @@ begin
 	endcase
 end
 
-DataMem mem(memWriteEnable, func3, memAddr, memWriteData, memReadData, memWatchAddr, memWatchData);
+DataMem mem(memWriteEnable, func3, memAddr[`MemAddrWidth-1:0], memWriteData, memReadData, memWatchAddr, memWatchData);
 endmodule

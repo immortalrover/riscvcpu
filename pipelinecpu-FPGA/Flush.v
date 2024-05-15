@@ -10,6 +10,8 @@ always @(posedge pcWriteEnable) number = 3'b101;
 
 always @(posedge clk)
 begin
-	number <= reset ? 0 : flush ? number + 1 : 0;
+	if (reset) number <= 0;
+	else if (flush) number <= number + 1;
+	else number <= 0;
 end
 endmodule

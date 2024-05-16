@@ -104,11 +104,6 @@ begin
 	else number <= 0;
 end
 
-InstrMem instrMem(PC[`AddrWidth-1:0], instrReg);
-
-seg7x16 u_seg7x16(clk, rstn, sw_i[0], displayData, disp_seg_o, disp_an_o);
-
-
 always @(*)
 begin
 	case({instr[6:0]}) // opcode
@@ -524,4 +519,10 @@ case (aluOp)
 	`Equal:												aluO = aluX == aluY;
 	`NotEqual:										aluO = aluX != aluY;
 endcase
+
+InstrMem instrMem(.a(PC[`AddrWidth-1:0]), .spo(instrReg));
+
+seg7x16 u_seg7x16(clk, rstn, sw_i[0], displayData, disp_seg_o, disp_an_o);
+
+
 endmodule

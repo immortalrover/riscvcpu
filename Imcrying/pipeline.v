@@ -99,12 +99,17 @@ always @(negedge disp_clk) begin
 	end
 end
 
-wire	[1:0]		forward_a;
-assign forward_a[0] = flush_influence ? 0 : rs1_influence == 0 ? 0 : rs1_influence == rd_influence[14:10];
-assign forward_a[1] = flush_influence ? 0 : rs1_influence == 0 ? 0 : rs1_influence == rd_influence[9:5];
-wire	[1:0]		forward_b;
-assign forward_b[0] = flush_influence ? 0 : rs2_influence == 0 ? 0 : rs2_influence == rd_influence[14:10];
-assign forward_b[1] = flush_influence ? 0 : rs2_influence == 0 ? 0 : rs2_influence == rd_influence[9:5];
+reg	[1:0]		forward_a;
+reg	[1:0]		forward_b;
+
+always @(*) begin
+	if (~flush_influence) begin
+		forward_a[0] = rs1_influence == 0 ? 0 : rs1_influence == rd_influence[14:10];
+		forward_a[1] = rs1_influence == 0 ? 0 : rs1_influence == rd_influence[9:5];
+		forward_b[0] = rs2_influence == 0 ? 0 : rs2_influence == rd_influence[14:10];
+		forward_b[1] = rs2_influence == 0 ? 0 : rs2_influence == rd_influence[9:5];
+	end
+end
 
 
 

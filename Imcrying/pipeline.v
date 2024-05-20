@@ -81,6 +81,14 @@ always @(*) begin
 	endcase
 end
 
+reg mem_read;
+always @(posedge mem_read, negedge rstn) begin
+	if (!rstn) hazard <= 0;
+	else if ((rs1 == rd_influence) || (rs2 == rd_influence)) hazard <= 1;
+	else hazard <= 0;
+end
+
+
 
 always @(posedge disp_clk, negedge rstn) begin
 	if (!rstn) begin

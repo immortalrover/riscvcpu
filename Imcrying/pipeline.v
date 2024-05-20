@@ -99,8 +99,22 @@ always @(negedge disp_clk) begin
 	end
 end
 
+reg		[31:0]	alu_x;
+reg		[31:0]	alu_y;
+reg		[4:0]		alu_op;
+wire	[31:0]	alu_o;
+alu U_alu (alu_op, alu_x, alu_y, alu_o);
+wire	[31:0]	alu_o_influence;
+flow #(0,32)	alu_o_flow (disp_clk, rstn, 0, alu_o, 32'b0, alu_o_influence);
+wire	[63:0]	pc_influence;
+flow #(1,32)	pc_flow (disp_clk, rstn, 0, pc, 32'b0, pc_influence);
+
 reg	[1:0]		forward_a;
 reg	[1:0]		forward_b;
+
+reg [2:0]		state;
+wire [2:0] state_influence;
+flow #(0,3) state_flow (disp_clk, rstn, 0, state, 0, state_influence);
 
 always @(*) begin
 	if (~flush_influence) begin
@@ -109,17 +123,205 @@ always @(*) begin
 		forward_b[0] = rs2_influence == 0 ? 0 : rs2_influence == rd_influence[14:10];
 		forward_b[1] = rs2_influence == 0 ? 0 : rs2_influence == rd_influence[9:5];
 	end
+
+	if (~flush) begin
+		case (opcode_influence)
+			7'b0110011: // FMT R
+			begin
+				case (funct3_influence[2:0])
+					0: alu_op = funct7_influence[5] ? `SUB : `ADD;	// add sub
+					1: alu_op = `SHIFTLEFTUNSIGNED;	// sll
+					2: alu_op = `LESSERTHANSIGNED;	// slt
+					3: alu_op = `LESSERTHANUNSIGNED; // sltu
+					4: alu_op = `XOR; // xor
+					5: alu_op = funct7_influence[5] ?	`SHIFTRIFHTSIGNED : `SHIFTRIFHTUNSIGNED; // srl sra
+					6: alu_op = `OR; // or
+					7: alu_op = `AND; // and
+				endcase
+				case (forward_a)
+					2'b00: alu_x = R[rs1_influence];
+					2'b01: alu_x = reg_write_data;
+					2'b11,2'b10: alu_x = alu_o_influence;
+					default: alu_x = R[rs1_influence];
+				endcase
+				case (forward_b)
+					2'b00: alu_y = R[rs2_influence];
+					2'b01: alu_y = reg_write_data;
+					2'b11,2'b10: alu_y = alu_o_influence;
+					default: alu_y = R[rs2_influence];
+				endcase
+				state = `REGWRITE;
+			end
+			7'b0010011: // FMT I
+			begin
+				case (func3)
+					0: alu_op = `ADD;	// addi
+					1: alu_op = `SHIFTLEFTUNSIGNED;	// slli
+					2: alu_op = `LESSERTHANSIGNED;	// slti
+					3: alu_op = `LESSERTHANUNSIGNED; // sltiu
+					4: alu_op = `XOR; // xori
+					5: alu_op = imm_influence[10] ?	`SHIFTRIFHTSIGNED : `SHIFTRIFHTUNSIGNED; // srli srai
+					6: alu_op = `OR; // ori
+					7: alu_op = `AND; // andi
+				endcase
+				case (forward_a)
+					2'b00: alu_x = R[rs1_influence];
+					2'b01: alu_x = reg_write_data;
+					2'b11,2'b10: alu_x = alu_o_influence;
+					default: alu_x = R[rs1_influence];
+				endcase
+				alu_y = imm_influence[31:0];
+				state = `REGWRITE;
+			end
+			7'b0000011: // FMT I lb lh lw lbu lhu
+			begin
+				case (forward_a)
+					2'b00: alu_x = R[rs1_influence];
+					2'b01: alu_x = reg_write_data;
+					2'b11,2'b10: alu_x = alu_o_influence;
+					default: alu_x = R[rs1_influence];
+				endcase
+				alu_y = imm_influence[31:0];
+				alu_op = `ADD;
+				state = `MEMREAD; // Read memory and write register
+			end
+			7'b0100011: // FMT S sb sh sw
+			begin
+				case (forward_a)
+					2'b00: alu_x = R[rs1_influence];
+					2'b01: alu_x = reg_write_data;
+					2'b11,2'b10: alu_x = alu_o_influence;
+					default: alu_x = R[rs1_influence];
+				endcase
+				alu_y = imm_influence[31:0];
+				alu_op = `ADD;
+				state	= `MEMWRITE;
+			end
+			7'b1100011: // FMT B
+			begin
+				case (func3)
+					0: alu_op = `EQUAL; // beq
+					1: alu_op = `NOTEQUAL; // bne
+					4: alu_op = `LESSERTHANSIGNED; // blt
+					5: alu_op = `GREATERTHANOREQUALSIGNED; // bge
+					6: alu_op = `LESSERTHANUNSIGNED; // bltu
+					7: alu_op = `GREATERTHANOREQUALUNSIGNED; // bgeu
+				endcase
+				case (forward_a)
+					2'b00: alu_x = R[rs1_influence];
+					2'b01: alu_x = reg_write_data;
+					2'b11,2'b10: alu_x = alu_o_influence;
+					default: alu_x = R[rs1_influence];
+				endcase
+				case (forward_b)
+					2'b00: alu_y = R[rs2_influence];
+					2'b01: alu_y = reg_write_data;
+					2'b11,2'b10: alu_y = alu_o_influence;
+					default: alu_y = R[rs2_influence];
+				endcase
+				state = `PCSELECTWRITE;
+			end
+			7'b1101111: // FMT J jal
+			begin
+				alu_x = pc_influence[63:32];
+				alu_y = imm_influence[31:0];
+				alu_op = `ADD;
+				state	= `PCWRITE;
+			end
+			7'b1100111: // FMT I jalr
+			begin
+				case (forward_a)
+					2'b00: alu_x = R[rs1_influence];
+					2'b01: alu_x = reg_write_data;
+					2'b11,2'b10: alu_x = alu_o_influence;
+					default: alu_x = R[rs1_influence];
+				endcase
+				alu_y = imm_influence[31:0];
+				alu_op = `ADD;
+				state	=	`PCWRITE;
+			end
+			7'b0110111: // FMT U lui
+			begin
+				state	=	`LUIREGWRITE;
+			end
+			7'b0010111: // FMT U auipc
+			begin
+				alu_x = pc_influence[63:32];
+				alu_y = imm_influence[31:0];
+				alu_op	=	`ADD;
+				state	=	`REGWRITE;
+			end
+			default: state = `IDLE;
+		endcase
+	end
+
+	case (state_influence)
+		`IDLE:
+		begin
+			reg_write_data = 0;
+			reg_write =	0;
+			mem_write =	0;
+			mem_write_data =	0;
+			pc_write = 0;
+		end
+		`REGWRITE:
+		begin
+			reg_write_data = alu_o_influence;
+			reg_write	=	1;
+			mem_write	=	0;
+			mem_write_data =	0;
+			pc_write = 0;
+		end	
+		`MEMREAD:
+		begin
+			mem_addr	= alu_o_influence;
+			reg_write_data = forwordB[0] ? data : memReadData;
+			reg_write	=	1;
+			mem_write	=	0;
+			mem_write_data = 0;
+			pc_write = 0;
+		end
+		`MEMWRITE:
+		begin
+			mem_addr	=	alu_o_influence;
+			mem_write_data = regReadData1; // forwordB ? data : 
+			mem_write	=	1;
+			reg_write_data = 0;
+			reg_write	=	0;
+			pc_write = 0;
+		end
+		`PCSELECTWRITE:
+		begin
+			if (alu_o_influence)
+			begin
+				pc_write = 1;
+				pc_write_data	=	pc_influence[63:32] + imm_influence[63:32] - 4;
+			end
+			reg_write_data = 0;
+			reg_write	=	0;
+			mem_write	=	0;
+			mem_write_data = 0;
+		end
+		`PCWRITE:
+		begin
+			pc_write = 1;
+			pc_write_data	=	alu_o_influence;
+			reg_write_data = pc_influence[63:32];
+			reg_write	=	1;
+			mem_write	=	0;
+			mem_write_data = 0;
+		end
+		`LUIREGWRITE:
+		begin
+			reg_write_data = imm_influence[63:32];
+			reg_write	= 1;
+			mem_write	=	0;
+			mem_write_data = 0;
+			pc_write = 0;
+		end
+	endcase
 end
 
-
-
-reg		[31:0]	alu_x;
-reg		[31:0]	alu_y;
-reg		[4:0]		alu_op;
-wire	[31:0]	alu_o;
-alu U_alu (alu_op, alu_x, alu_y, alu_o);
-flow #(0,32)	alu_o_flow (disp_clk, rstn, 0, alu_o, 32'b0, alu_o_influence);
-flow #(1,32)	pc_flow (disp_clk, rstn, 0, pc, 32'b0, pc_influence);
 
 
 
@@ -150,6 +352,9 @@ always @(sw_i) begin
 		4'b0110: display_data <= R[rs1];
 		4'b0111: display_data <= rs2;
 		4'b1000: display_data <= R[rs2];
+		4'b1001: display_data <= alu_x;
+		4'b1010: display_data <= alu_y;
+		4'b1011: display_data <= alu_o;
     default: display_data <= sw_i;
   endcase 
 end

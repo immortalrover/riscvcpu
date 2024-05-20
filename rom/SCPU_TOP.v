@@ -9,8 +9,11 @@ module xgriscv_pipeline (
 	
 reg		[31:0]	clkdiv;
 wire					Clk_CPU = (sw_i[15]) ? clkdiv[27] : clkdiv[25];
-always @(posedge clk, negedge rstn) clkdiv <= rstn ? clkdiv + 1'b1 : 0;
-    
+always @(posedge clk, negedge rstn) begin
+	if (!rstn) clkdiv <= 0;
+	else clkdiv <= clkdiv + 1'b1;
+end    
+
 reg[63:0] display_data;
 reg[5:0] led_data_addr;
 reg[63:0] led_disp_data;

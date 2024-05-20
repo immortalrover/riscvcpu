@@ -99,15 +99,16 @@ end
 
 
 always @(sw_i) begin
-  case (sw_i[2:0])
-    3'b000: display_data <= instr; // WAITING
-    3'b001: display_data <= instr_pc;
-    3'b010: display_data <= pc;
-    3'b011: display_data <= instr_disp;
-		/* 3'b100: display_data <= reg_num; */
-		/* 3'b101: display_data <= reg_write_data; */
-		/* 3'b110: display_data <= ram_read_data; */
-		/* 3'b111: display_data <= ram_addr; */
+  case (sw_i[3:0])
+    4'b0000: display_data <= instr; // WAITING
+    4'b0001: display_data <= rom_addr; // WAITING
+    4'b0010: display_data <= instr_pc;
+    4'b0011: display_data <= pc;
+    4'b0100: display_data <= instr_disp;
+		4'b0101: display_data <= rs1;
+		/* 4'b0110: display_data <= R[rs1]; */
+		4'b0111: display_data <= rs2;
+		/* 4'b1000: display_data <= R[rs2]; */
     default: display_data <= sw_i;
   endcase 
 end

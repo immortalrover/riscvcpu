@@ -359,6 +359,9 @@ always @(sw_i) begin
 		4'b1001: display_data <= alu_x;
 		4'b1010: display_data <= alu_y;
 		4'b1011: display_data <= alu_o;
+		4'b1100: display_data <= imm;
+		4'b1101: display_data <= rd;
+		4'b1110: display_data <= reg_write_data;
     default: display_data <= sw_i;
   endcase 
 end

@@ -19,7 +19,7 @@ end
 
 reg		[7:0]			o_sel_r;
 always @(*) begin
-  case(seg7_addr)
+  case (seg7_addr)
     7: o_sel_r = 8'b01111111;
     6: o_sel_r = 8'b10111111;
     5: o_sel_r = 8'b11011111;
@@ -39,7 +39,7 @@ end
 
 reg		[7:0]		seg_data_r;
 always @(*) begin
-  case(seg7_addr)
+  case (seg7_addr)
     0: seg_data_r = i_data_store[3:0];
     1: seg_data_r = i_data_store[7:4];
     2: seg_data_r = i_data_store[11:8];
@@ -55,7 +55,7 @@ reg		[7:0]		o_seg_r;
 always @(posedge clk, negedge rstn) begin
   if (!rstn) o_seg_r <= 8'hff;
   else begin
-    case(seg_data_r)
+    case (seg_data_r)
       4'h0: o_seg_r <= 8'hC0;
       4'h1: o_seg_r <= 8'hF9;
       4'h2: o_seg_r <= 8'hA4;

@@ -1,6 +1,6 @@
 module flow #(parameter NUM = 0, parameter WIDTH = 8) (
-	input												clk, rstn,
-	input		[WIDTH-1:0]					x,
+	input												clk, rstn, en,
+	input		[WIDTH-1:0]					x, init_x,
 	output	[(NUM+1)*WIDTH-1:0]	y
 );
 
@@ -22,7 +22,8 @@ always @(posedge clk, negedge rstn) begin
 		data2 <= 0;
 	end
 	else if (clk) begin
-		data1[(NUM+1)*WIDTH-1:NUM*WIDTH] <= x;
+		if (en) data1[(NUM+1)*WIDTH-1:NUM*WIDTH] <= x;
+		else data1[(NUM+1)*WIDTH-1:NUM*WIDTH] <= init_x;
 		if (NUM != 0) data1[NUM*WIDTH-1:0] <= data2;
 	end
 end

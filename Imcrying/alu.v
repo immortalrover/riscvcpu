@@ -12,15 +12,15 @@ case (alu_op)
 	`OR:													alu_o = alu_x |  alu_y;
 	`XOR:													alu_o = alu_x ^  alu_y;
 	`AND:													alu_o = alu_x &  alu_y;
-	`LesserThanUnsigned:					alu_o = alu_x <  alu_y;
-	`LesserThanSigned:						alu_o = $signed(alu_x) < $signed(alu_y);
-	`ShiftRightUnsigned:					alu_o = alu_x >> (alu_y[4:0]);
-	`ShiftRightSigned:						alu_o = $signed(alu_x) >>> (alu_y[4:0]);
-	`ShiftLeftUnsigned:						alu_o = alu_x << (alu_y[4:0]); 
-	`ShiftLeftSigned:							alu_o = alu_x << (alu_y[4:0]);
-	`GreaterThanOrEqualUnsigned:	alu_o = alu_x >= alu_y;
-	`GreaterThanOrEqualSigned:		alu_o = $signed(alu_x) >= $signed(alu_y);
-	`Equal:												alu_o = alu_x == alu_y;
-	`NotEqual:										alu_o = alu_x != alu_y;
+	`LESSERTHANUNSIGNED:					alu_o = alu_x <  alu_y;
+	`LESSERTHANSIGNED:						alu_o = $signed(alu_x) < $signed(alu_y);
+	`SHIFTRIGHTUNSIGNED:					alu_o = alu_x >> (alu_y[4:0]);
+	`SHIFTRIGHTSIGNED:						alu_o = $signed(alu_x) >>> (alu_y[4:0]);
+	`SHIFTLEFTUNSIGNED:						alu_o = alu_x << (alu_y[4:0]); 
+	`SHIFTLEFTSIGNED:							alu_o = alu_x << (alu_y[4:0]);
+	`GREATERTHANOREQUALUNSIGNED:	alu_o = alu_x >= alu_y;
+	`GREATERTHANOREQUALSIGNED:		alu_o = $signed(alu_x) >= $signed(alu_y);
+	`EQUAL:												alu_o = alu_x == alu_y;
+	`NOTEQUAL:										alu_o = alu_x != alu_y;
 endcase
 endmodule

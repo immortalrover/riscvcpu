@@ -17,7 +17,7 @@ always @(posedge clk, negedge rstn) begin
 	end
 	else if (clk) begin
 		if (en) data[WIDTH-1:0] <= x;
-		else data[(WIDTH-1:0] <= init_x;
+		else data[WIDTH-1:0] <= init_x;
 		if (NUM != 0) data[(NUM+1)*WIDTH-1:WIDTH] <= data[NUM*WIDTH-1:0];
 	end
 end

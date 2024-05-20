@@ -21,22 +21,30 @@ reg		[31:0]	reg_data;
 reg		[31:0]	alu_disp_data;
 reg		[31:0]	dmem_data;
 parameter ROM_NUM = 23;
-always @(posedge disp_clk or negedge rstn) begin
-  if (!rstn) begin 
-    rom_addr <= 6'b0;
-  end
-  else if ( rom_addr == ROM_NUM ) begin 
-		rom_addr <= 6'd0;
-	end 
+always @(posedge disp_clk, negedge rstn) begin
+  if (!rstn) rom_addr <= 6'b0;
+  else if ( rom_addr == ROM_NUM )	rom_addr <= 6'd0;
 	else rom_addr <= rom_addr + 1;
+end
+
+reg		[31:0]	pc;
+reg		[31:0]	pc_next;
+wire	[31:0]	instr_pc = pc >> 2;
+reg	pc_write, pc_write_data;
+wire	[31:0]	instr_run;
+always @(posedge clk, negedge rstn) begin
+	if (!rstn) pc_next <= 31'b0;
+	else if (pc_write) pc_next <= pc_write_data;
+	else pc_next <= pc + 4;
+	pc <= pc_next;
 end
 
 always@(sw_i) begin
   case(sw_i[2:0])
-    3'b000: display_data <= sw_i; // WAITING
-    3'b001: display_data <= rom_addr;
-    /* 3'b010: display_data <= pc; */
-    3'b011: display_data <= instr;
+    3'b000: display_data <= instr; // WAITING
+    3'b001: display_data <= instr_pc;
+    3'b010: display_data <= pc;
+    3'b011: display_data <= instr_run;
 		/* 3'b100: display_data <= reg_num; */
 		/* 3'b101: display_data <= reg_write_data; */
 		/* 3'b110: display_data <= ram_read_data; */
@@ -45,9 +53,14 @@ always@(sw_i) begin
   endcase 
 end
 
-dist_mem_gen_0 U_IM(
+dist_mem_gen_0 U_IM0(
   .a(rom_addr),
   .spo(instr)
+);
+
+dist_mem_gen_1 U_IM1(
+  .a(instr_pc),
+  .spo(instr_run)
 );
 
 seg7x16 u_seg7x16(

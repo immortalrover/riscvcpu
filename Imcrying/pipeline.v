@@ -32,7 +32,7 @@ reg		[31:0]	pc_next;
 wire	[31:0]	instr_pc = pc >> 2;
 reg	pc_write, pc_write_data;
 wire	[31:0]	instr_run;
-always @(posedge clk, negedge rstn) begin
+always @(posedge disp_clk, negedge rstn) begin
 	if (!rstn) pc_next <= 31'b0;
 	else if (pc_write) pc_next <= pc_write_data;
 	else pc_next <= pc + 4;

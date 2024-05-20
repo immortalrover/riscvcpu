@@ -3,8 +3,8 @@
 module xgriscv_pipeline (
 	input						clk, rstn,
 	input		[15:0]	sw_i,
-  output	[7:0]		disp_seg_o,
-  output	[7:0]		disp_an_o
+	output	[7:0]		disp_seg_o,
+	output	[7:0]		disp_an_o
 );
 	
 reg		[31:0]	clkdiv;
@@ -14,11 +14,17 @@ always @(posedge clk, negedge rstn) begin
 	else clkdiv <= clkdiv + 1'b1;
 end    
 
-reg[63:0] display_data;
-reg[5:0] led_data_addr;
-reg[63:0] led_disp_data;
-parameter LED_DATA_NUM=19;
-reg[63:0] LED_DATA[47:0];
+reg		[63:0]	display_data;
+reg		[5:0]		led_data_addr;
+reg		[63:0]	led_disp_data;
+reg		[63:0]	LED_DATA[47:0];
+reg		[5:0]		rom_addr;
+wire	[31:0]	instr;
+reg		[31:0]	reg_data;
+reg		[31:0]	alu_disp_data;
+reg		[31:0]	dmem_data;
+parameter LED_DATA_NUM = 19;
+parameter ROM_NUM = 12;
 initial begin
   LED_DATA[0] = 64'hFFFFFFFEFEFEFEFE;
   LED_DATA[1] = 64'hFFFEFEFEFEFEFFFF;
@@ -70,62 +76,59 @@ initial begin
   LED_DATA[47] =64'hFFFFFFFFDFDFDFDD;
 end
 
-always@(posedge Clk_CPU or negedge rstn) begin
-  if(!rstn) begin 
-    led_data_addr=6'd0;
-    led_disp_data=64'b1;
+always @(posedge Clk_CPU or negedge rstn) begin
+  if (!rstn) begin 
+    led_data_addr <= 6'd0;
+    led_disp_data <= 64'b0;
   end
-  else if(sw_i[0]==1'b1) begin
-    if(led_data_addr==LED_DATA_NUM)begin led_data_addr=6'd0;led_disp_data=64'b1;end
-    led_disp_data=LED_DATA[led_data_addr];
-    led_data_addr=led_data_addr+1'b1;
+  else if (sw_i[0] == 1'b1) begin
+    if (led_data_addr == LED_DATA_NUM) begin 
+			led_data_addr <= 6'd0;
+			led_disp_data <= 64'b0;
+		end
+    led_disp_data <= LED_DATA[led_data_addr];
+    led_data_addr <= led_data_addr+1'b1;
   end
-  else led_data_addr=led_data_addr;
+  else led_data_addr <= led_data_addr;
 end
 
-reg[5:0] rom_addr;
-parameter ROM_NUM=12;
-always@(posedge Clk_CPU or negedge rstn) begin
-  if(!rstn) begin 
-    rom_addr = 6'b0;
+always @(posedge Clk_CPU or negedge rstn) begin
+  if (!rstn) begin 
+    rom_addr <= 6'b0;
   end
-  else if(sw_i[1]==1'b1) begin
-    if(rom_addr==ROM_NUM)begin rom_addr=6'd0;end
-    rom_addr = rom_addr + 1;
+  else if( sw_i[1] == 1'b1) begin
+    if ( rom_addr == ROM_NUM ) begin 
+			rom_addr <= 6'd0;
+		end
+    rom_addr <= rom_addr + 1;
   end
-  else rom_addr=rom_addr;
+  else rom_addr <= rom_addr;
 end
 
-wire [31:0] instr;
-reg [31:0]reg_data;
-reg [31:0]alu_disp_data;
-reg [31:0]dmem_data;
+always@(sw_i) begin
+  if(sw_i[0] == 0) begin
+    case(sw_i[14:11])
+      4'b1000: display_data <= instr;
+      4'b0100: display_data <= reg_data;
+      4'b0010: display_data <= alu_disp_data;
+      4'b0001: display_data <= dmem_data;
+      default: display_data <= instr;
+    endcase 
+  end
+  else display_data <= led_disp_data;
+end
 
 dist_mem_im U_IM(
   .a(rom_addr),
   .spo(instr)
 );
 
-always@(sw_i) begin
-  if(sw_i[0] == 0) begin
-    case(sw_i[14:11])
-      4'b1000:display_data=instr;
-      4'b0100:display_data=reg_data;
-      4'b0010:display_data=alu_disp_data;
-      4'b0001:display_data=dmem_data;
-      default:display_data=instr;
-    endcase 
-  end
-  else display_data=led_disp_data;
-end
-
 seg7x16 u_seg7x16(
-.clk(clk),
-.rstn(rstn),
-.i_data(display_data),
-.disp_mode(sw_i[0]),
-.o_seg(disp_seg_o),
-.o_sel(disp_an_o)
+	.clk(clk),
+	.rstn(rstn),
+	.i_data(display_data),
+	.disp_mode(sw_i[0]),
+	.o_seg(disp_seg_o),
+	.o_sel(disp_an_o)
 );
-
 endmodule

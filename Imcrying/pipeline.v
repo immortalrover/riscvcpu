@@ -279,7 +279,7 @@ always @(*) begin
 		`MEMREAD:
 		begin
 			mem_addr	= alu_o_influence;
-			reg_write_data = forwordB[0] ? data : memReadData;
+			reg_write_data = mem_read_data;
 			reg_write	=	1;
 			mem_write	=	0;
 			mem_write_data = 0;
@@ -288,7 +288,7 @@ always @(*) begin
 		`MEMWRITE:
 		begin
 			mem_addr	=	alu_o_influence;
-			mem_write_data = regReadData1; // forwordB ? data : 
+			mem_write_data = R[rs2_influence]; // forwordB ? data : 
 			mem_write	=	1;
 			reg_write_data = 0;
 			reg_write	=	0;

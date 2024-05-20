@@ -21,22 +21,25 @@ reg		[31:0]	reg_data;
 reg		[31:0]	alu_disp_data;
 reg		[31:0]	dmem_data;
 parameter ROM_NUM = 23;
-always @(posedge disp_clk, negedge rstn) begin
-  if (!rstn) rom_addr <= 6'b0;
-  else if ( rom_addr == ROM_NUM )	rom_addr <= 6'd0;
-	else rom_addr <= rom_addr + 1;
-end
 
+// IMWRITING
 reg		[31:0]	pc;
 reg		[31:0]	pc_next;
 wire	[31:0]	instr_pc = pc >> 2;
 reg	pc_write, pc_write_data;
 wire	[31:0]	instr_run;
 always @(posedge disp_clk, negedge rstn) begin
-	if (!rstn) pc_next <= 31'b0;
-	else if (pc_write) pc_next <= pc_write_data;
-	else pc_next <= pc + 4;
-	pc <= pc_next;
+	if (!rstn) begin
+		rom_addr <= 6'b0;
+		pc_next <= 32'b0;
+	end
+	else begin
+		if ( rom_addr == ROM_NUM ) rom_addr <= 6'd0;
+		else rom_addr <= rom_addr + 1;
+		if (pc_write) pc_next <= pc_write_data;
+		else pc_next <= pc + 4;
+		pc <= pc_next;
+	end
 end
 
 always@(sw_i) begin

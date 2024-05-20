@@ -1,5 +1,6 @@
 `timescale 1ns / 1ps
 
+`include "defines.v"
 module xgriscv_pipeline (
 	input						clk, rstn,
 	input		[15:0]	sw_i,
@@ -31,8 +32,10 @@ wire	[31:0]	instr_disp;
 wire	[31:0]	instr_influence;
 flow #(0,32)	instr_flow (disp_clk, rstn, ~hazard, instr_disp, 32'h00000013, instr_influence);
 wire	[1:0]		pc_write_influence;
-flow #(1,1)		pc_write_flow (disp_clk, rstn, pc_write, pc_write_influence);
+flow #(1,1)		pc_write_flow (disp_clk, rstn, 0, pc_write, 0, pc_write_influence);
 wire					flush = pc_write || pc_write_influence[1] || pc_write_influence[0];
+wire					flush_influence;
+flow #(0,1)		flush_flow (disp_clk, rstn, 0, flush, 0, flush_influence);
 
 wire	[6:0]		opcode = instr_influence[6:0];
 wire	[6:0]		opcode_influence;
@@ -96,11 +99,20 @@ always @(negedge disp_clk) begin
 	end
 end
 
+wire	[1:0]		forward_a;
+assign forward_a[0] = flush_influence ? 0 : rs1_influence == 0 ? 0 : rs1_influence == rd_influence[14:10];
+assign forward_a[1] = flush_influence ? 0 : rs1_influence == 0 ? 0 : rs1_influence == rd_influence[9:5];
+wire	[1:0]		forward_b;
+assign forward_b[0] = flush_influence ? 0 : rs2_influence == 0 ? 0 : rs2_influence == rd_influence[14:10];
+assign forward_b[1] = flush_influence ? 0 : rs2_influence == 0 ? 0 : rs2_influence == rd_influence[9:5];
+
+
 
 reg		[31:0]	alu_x;
 reg		[31:0]	alu_y;
 reg		[4:0]		alu_op;
 wire	[31:0]	alu_o;
+alu U_alu (alu_op, alu_x, alu_y, alu_o);
 flow #(0,32)	alu_o_flow (disp_clk, rstn, 0, alu_o, 32'b0, alu_o_influence);
 flow #(1,32)	pc_flow (disp_clk, rstn, 0, pc, 32'b0, pc_influence);
 

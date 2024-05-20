@@ -18,9 +18,6 @@ end
 reg		[31:0]	display_data;
 reg		[5:0]		rom_addr;
 wire	[31:0]	instr;
-reg		[31:0]	reg_data;
-reg		[31:0]	alu_disp_data;
-reg		[31:0]	dmem_data;
 parameter ROM_NUM = 23;
 
 // IMWRITING
@@ -91,11 +88,16 @@ always @(posedge mem_read, negedge rstn) begin
 	else hazard <= 0;
 end
 
-reg reg_write, reg_write_data;
+reg					reg_write;
+wire				reg_write_influence;
+flow #(0,1) reg_write_flow (disp_clk, rstn, 0, reg_write, 0, reg_write_influence);
+reg	[31:0]	reg_write_data;
+wire [31:0]	reg_write_data_influence;
+flow #(0,32) reg_write_data_flow (disp_clk, rstn, 0, reg_write_data, reg_write_data_influence);
 reg		[31:0]	R[31:0];
 always @(negedge disp_clk) begin
-	if (reg_write && rd_influence[14:10] != 0) begin
-		R[rd_influence[14:10]] <= reg_write_data;
+	if (reg_write_influence && rd_influence[14:10] != 0) begin
+		R[rd_influence[14:10]] <= reg_write_data_influence;
 	end
 end
 
@@ -116,6 +118,8 @@ reg [2:0]		state;
 wire [2:0] state_influence;
 flow #(0,3) state_flow (disp_clk, rstn, 0, state, 0, state_influence);
 
+reg mem_write, mem_write_data, mem_addr;
+
 always @(*) begin
 	if (~flush_influence) begin
 		forward_a[0] = rs1_influence == 0 ? 0 : rs1_influence == rd_influence[14:10];
@@ -134,7 +138,7 @@ always @(*) begin
 					2: alu_op = `LESSERTHANSIGNED;	// slt
 					3: alu_op = `LESSERTHANUNSIGNED; // sltu
 					4: alu_op = `XOR; // xor
-					5: alu_op = funct7_influence[5] ?	`SHIFTRIFHTSIGNED : `SHIFTRIFHTUNSIGNED; // srl sra
+					5: alu_op = funct7_influence[5] ?	`SHIFTRIGHTSIGNED : `SHIFTRIGHTUNSIGNED; // srl sra
 					6: alu_op = `OR; // or
 					7: alu_op = `AND; // and
 				endcase
@@ -154,13 +158,13 @@ always @(*) begin
 			end
 			7'b0010011: // FMT I
 			begin
-				case (func3)
+				case (funct3_influence)
 					0: alu_op = `ADD;	// addi
 					1: alu_op = `SHIFTLEFTUNSIGNED;	// slli
 					2: alu_op = `LESSERTHANSIGNED;	// slti
 					3: alu_op = `LESSERTHANUNSIGNED; // sltiu
 					4: alu_op = `XOR; // xori
-					5: alu_op = imm_influence[10] ?	`SHIFTRIFHTSIGNED : `SHIFTRIFHTUNSIGNED; // srli srai
+					5: alu_op = imm_influence[10] ?	`SHIFTRIGHTSIGNED : `SHIFTRIGHTUNSIGNED; // srli srai
 					6: alu_op = `OR; // ori
 					7: alu_op = `AND; // andi
 				endcase
@@ -199,7 +203,7 @@ always @(*) begin
 			end
 			7'b1100011: // FMT B
 			begin
-				case (func3)
+				case (funct3_influence)
 					0: alu_op = `EQUAL; // beq
 					1: alu_op = `NOTEQUAL; // bne
 					4: alu_op = `LESSERTHANSIGNED; // blt

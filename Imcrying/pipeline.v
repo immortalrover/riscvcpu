@@ -39,8 +39,8 @@ wire	[6:0]		opcode_influence;
 flow #(0,7)		opcode_flow (disp_clk, rstn, ~hazard, opcode, 7'b0110011, opcode_influence);
 
 wire	[2:0]		funct3 = instr_influence[14:12];
-wire	[2:0]		funct3_influence;
-flow #(0,3)		funct3_flow (disp_clk, rstn, ~hazard, funct3, 3'b0, funct3_influence);
+wire	[5:0]		funct3_influence;
+flow #(1,3)		funct3_flow (disp_clk, rstn, ~hazard, funct3, 3'b0, funct3_influence);
 
 wire	[6:0]		funct7 = instr_influence[31:25];
 wire	[6:0]		funct7_influence;
@@ -55,12 +55,12 @@ wire	[4:0]		rs2_influence;
 flow #(0,5)		rs2_flow (disp_clk, rstn, ~hazard, rs2, 5'b0, rs2_influence);
 
 wire	[4:0]		rd = instr_influence[11:7];
-wire	[4:0]		rd_influence;
-flow #(0,5)		rd_flow (disp_clk, rstn, ~hazard, rd, 5'b0, rd_influence);
+wire	[14:0]		rd_influence;
+flow #(2,5)		rd_flow (disp_clk, rstn, ~hazard, rd, 5'b0, rd_influence);
 
 reg		[31:0]	imm;
-wire	[31:0]	imm_influence;
-flow #(0,32)	imm_flow (disp_clk, rstn, 0, imm, 32'b0, imm_influence);
+wire	[63:0]	imm_influence;
+flow #(1,32)	imm_flow (disp_clk, rstn, 0, imm, 32'b0, imm_influence);
 always @(*) begin
 	case(opcode) // opcode
 		7'b0010011, 7'b1100111, 7'b0000011:	// FMT I
@@ -84,9 +84,25 @@ end
 reg mem_read;
 always @(posedge mem_read, negedge rstn) begin
 	if (!rstn) hazard <= 0;
-	else if ((rs1 == rd_influence) || (rs2 == rd_influence)) hazard <= 1;
+	else if ((rs1 == rd_influence[4:0]) || (rs2 == rd_influence[4:0])) hazard <= 1;
 	else hazard <= 0;
 end
+
+reg reg_write, reg_write_data;
+reg		[31:0]	R[31:0];
+always @(negedge disp_clk) begin
+	if (reg_write && rd_influence[14:10] != 0) begin
+		R[rd_influence[14:10]] <= reg_write_data;
+	end
+end
+
+
+reg		[31:0]	alu_x;
+reg		[31:0]	alu_y;
+reg		[4:0]		alu_op;
+wire	[31:0]	alu_o;
+flow #(0,32)	alu_o_flow (disp_clk, rstn, 0, alu_o, 32'b0, alu_o_influence);
+flow #(1,32)	pc_flow (disp_clk, rstn, 0, pc, 32'b0, pc_influence);
 
 
 
@@ -114,9 +130,9 @@ always @(sw_i) begin
     4'b0011: display_data <= pc;
     4'b0100: display_data <= instr_disp;
 		4'b0101: display_data <= rs1;
-		/* 4'b0110: display_data <= R[rs1]; */
+		4'b0110: display_data <= R[rs1];
 		4'b0111: display_data <= rs2;
-		/* 4'b1000: display_data <= R[rs2]; */
+		4'b1000: display_data <= R[rs2];
     default: display_data <= sw_i;
   endcase 
 end

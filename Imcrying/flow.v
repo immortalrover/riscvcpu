@@ -5,16 +5,11 @@ module flow #(parameter NUM = 0, parameter WIDTH = 8) (
 );
 
 reg [(NUM+1)*WIDTH-1:0]	data1;
-reg [NUM*WIDTH-1:0]			data2;
-genvar i;
-generate 
-	for (i = 0; i < NUM; i = i + 1) begin
-		always @(*) begin
-			data2[(i+1)*WIDTH-1:i*WIDTH] = data1[(i+2)*WIDTH-1:(i+1)*WIDTH];
-		end
-	end
-endgenerate
+wire [NUM*WIDTH-1:0]		data2 = data1[NUM*WIDTH-1:0];
 
+/* always @(*) begin */
+/* 	data2 <= data1[NUM*WIDTH-1:0]; */
+/* end */
 
 always @(posedge clk, negedge rstn) begin
 	if (!rstn)	begin
@@ -22,9 +17,9 @@ always @(posedge clk, negedge rstn) begin
 		data2 <= 0;
 	end
 	else if (clk) begin
-		if (en) data1[(NUM+1)*WIDTH-1:NUM*WIDTH] <= x;
-		else data1[(NUM+1)*WIDTH-1:NUM*WIDTH] <= init_x;
-		if (NUM != 0) data1[NUM*WIDTH-1:0] <= data2;
+		if (en) data1[WIDTH-1:0] <= x;
+		else data1[(WIDTH-1:0] <= init_x;
+		if (NUM != 0) data1[(NUM+1)*WIDTH-1:WIDTH] <= data2;
 	end
 end
 

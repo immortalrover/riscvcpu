@@ -54,7 +54,7 @@ seg7x16 u_seg7x16(
 	.clk(clk),
 	.rstn(rstn),
 	.i_data(display_data),
-	.disp_mode(sw_i[0]),
+	.disp_mode(sw_i[14]),
 	.o_seg(disp_seg_o),
 	.o_sel(disp_an_o)
 );

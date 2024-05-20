@@ -118,7 +118,7 @@ reg [2:0]		state;
 wire [2:0] state_influence;
 flow #(0,3) state_flow (disp_clk, rstn, 0, state, 0, state_influence);
 
-reg mem_write, mem_write_data, mem_addr;
+reg mem_write, mem_write_data, mem_addr, mem_read_data;
 
 always @(*) begin
 	if (~flush_influence) begin

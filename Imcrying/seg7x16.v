@@ -1,6 +1,5 @@
 module seg7x16 (
   input						clk, rstn,
-  input						disp_mode,
   input		[31:0]	i_data,
   output	[7:0]		o_seg, o_sel
 );

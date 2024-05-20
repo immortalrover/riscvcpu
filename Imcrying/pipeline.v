@@ -14,7 +14,7 @@ always @(posedge clk, negedge rstn) begin
 	else clk_div <= clk_div + 1'b1;
 end    
 
-reg		[63:0]	display_data;
+reg		[31:0]	display_data;
 reg		[5:0]		rom_addr;
 wire	[31:0]	instr;
 reg		[31:0]	reg_data;
@@ -54,7 +54,6 @@ seg7x16 u_seg7x16(
 	.clk(clk),
 	.rstn(rstn),
 	.i_data(display_data),
-	.disp_mode(sw_i[14]),
 	.o_seg(disp_seg_o),
 	.o_sel(disp_an_o)
 );

@@ -1,4 +1,4 @@
-module Pipe #(parameter NUM = 0, parameter WIDTH = 8) (
+module flow #(parameter NUM = 0, parameter WIDTH = 8) (
 	input												clk, rstn,
 	input		[WIDTH-1:0]					x,
 	output	[(NUM+1)*WIDTH-1:0]	y

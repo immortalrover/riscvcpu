@@ -20,18 +20,15 @@ wire	[31:0]	instr;
 reg		[31:0]	reg_data;
 reg		[31:0]	alu_disp_data;
 reg		[31:0]	dmem_data;
-parameter ROM_NUM = 12;
+parameter ROM_NUM = 23;
 always @(posedge disp_clk or negedge rstn) begin
   if (!rstn) begin 
     rom_addr <= 6'b0;
   end
-  else if( sw_i[1] == 1'b1) begin
-    if ( rom_addr == ROM_NUM ) begin 
-			rom_addr <= 6'd0;
-		end
-    rom_addr <= rom_addr + 1;
-  end
-  else rom_addr <= rom_addr;
+  else if ( rom_addr == ROM_NUM ) begin 
+		rom_addr <= 6'd0;
+	end 
+	else rom_addr <= rom_addr + 1;
 end
 
 always@(sw_i) begin

@@ -8,7 +8,7 @@ module xgriscv_pipeline (
 );
 	
 reg		[31:0]	clk_div;
-wire					disp_clk = (sw_i[15]) ? clk_div[25] : clk_div[24];
+wire					disp_clk = (sw_i[15]) ? clk_div[29] : clk_div[24];
 always @(posedge clk, negedge rstn) begin
 	if (!rstn) clk_div <= 0;
 	else clk_div <= clk_div + 1'b1;

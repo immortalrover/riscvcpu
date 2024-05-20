@@ -362,6 +362,7 @@ always @(sw_i) begin
 		4'b1100: display_data <= imm;
 		4'b1101: display_data <= rd;
 		4'b1110: display_data <= reg_write_data;
+		4'b1111: display_data <= state;
     default: display_data <= sw_i;
   endcase 
 end

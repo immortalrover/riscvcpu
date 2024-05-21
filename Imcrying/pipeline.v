@@ -10,6 +10,7 @@ module xgriscv_pipeline (
 	
 reg		[31:0]	clk_div;
 wire					disp_clk = (sw_i[15]) ? clk_div[29] : clk_div[24];
+/* wire					disp_clk = clk; // for test */
 always @(posedge clk, negedge rstn) begin
 	if (!rstn) clk_div <= 0;
 	else clk_div <= clk_div + 1'b1;
@@ -324,6 +325,9 @@ always @(*) begin
 			pc_write = 0;
 		end
 	endcase
+
+		if (pc_write) pc_next = pc_write_data;
+		else pc_next = pc + 4;
 end
 
 
@@ -337,8 +341,8 @@ always @(posedge disp_clk, negedge rstn) begin
 	else begin
 		if ( rom_addr == ROM_NUM ) rom_addr <= 7'd0;
 		else rom_addr <= rom_addr + 1;
-		if (pc_write) pc_next <= pc_write_data;
-		else pc_next <= pc + 4;
+		/* if (pc_write) pc_next <= pc_write_data; */
+		/* else pc_next <= pc + 4; */
 		if (~hazard) pc <= pc_next;
 		else pc <= pc;
 	end

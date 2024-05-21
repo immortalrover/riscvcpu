@@ -2,3 +2,8 @@
 
 **/build/
 a.out
+
+# FPGA-test
+
+imem.v
+test.dat

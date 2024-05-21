@@ -16,7 +16,7 @@ always @(posedge clk, negedge rstn) begin
 end    
 
 reg		[31:0]	display_data;
-reg		[5:0]		rom_addr;
+reg		[6:0]		rom_addr;
 wire	[31:0]	instr;
 parameter ROM_NUM = 23;
 
@@ -29,10 +29,10 @@ wire	[31:0]	instr_disp;
 wire	[31:0]	instr_influence;
 flow #(0,32)	instr_flow (disp_clk, rstn, ~hazard, instr_disp, 32'h00000013, instr_influence);
 wire	[1:0]		pc_write_influence;
-flow #(1,1)		pc_write_flow (disp_clk, rstn, 0, pc_write, 0, pc_write_influence);
+flow #(1,1)		pc_write_flow (disp_clk, rstn, 1'b0, pc_write, 1'b0, pc_write_influence);
 wire					flush = pc_write || pc_write_influence[1] || pc_write_influence[0];
 wire					flush_influence;
-flow #(0,1)		flush_flow (disp_clk, rstn, 0, flush, 0, flush_influence);
+flow #(0,1)		flush_flow (disp_clk, rstn, 1'b0, flush, 1'b0, flush_influence);
 
 wire	[6:0]		opcode = instr_influence[6:0];
 wire	[6:0]		opcode_influence;
@@ -60,7 +60,7 @@ flow #(2,5)		rd_flow (disp_clk, rstn, ~hazard, rd, 5'b0, rd_influence);
 
 reg		[31:0]	imm;
 wire	[63:0]	imm_influence;
-flow #(1,32)	imm_flow (disp_clk, rstn, 0, imm, 32'b0, imm_influence);
+flow #(1,32)	imm_flow (disp_clk, rstn, 1'b0, imm, 32'b0, imm_influence);
 always @(*) begin
 	case(opcode) // opcode
 		7'b0010011, 7'b1100111, 7'b0000011:	// FMT I
@@ -90,10 +90,10 @@ end
 
 reg					reg_write;
 wire				reg_write_influence;
-flow #(0,1) reg_write_flow (disp_clk, rstn, 0, reg_write, 0, reg_write_influence);
+flow #(0,1) reg_write_flow (disp_clk, rstn, 1'b0, reg_write, 1'b0, reg_write_influence);
 reg	[31:0]	reg_write_data;
 wire [31:0]	reg_write_data_influence;
-flow #(0,32) reg_write_data_flow (disp_clk, rstn, 0, reg_write_data, reg_write_data_influence);
+flow #(0,32) reg_write_data_flow (disp_clk, rstn, 1'b0, reg_write_data, 0, reg_write_data_influence);
 reg		[31:0]	R[31:0];
 always @(negedge disp_clk) begin
 	if (reg_write_influence && rd_influence[14:10] != 0) begin
@@ -103,20 +103,20 @@ end
 
 reg		[31:0]	alu_x;
 reg		[31:0]	alu_y;
-reg		[4:0]		alu_op;
+reg		[3:0]		alu_op;
 wire	[31:0]	alu_o;
 alu U_alu (alu_op, alu_x, alu_y, alu_o);
 wire	[31:0]	alu_o_influence;
-flow #(0,32)	alu_o_flow (disp_clk, rstn, 0, alu_o, 32'b0, alu_o_influence);
+flow #(0,32)	alu_o_flow (disp_clk, rstn, 1'b0, alu_o, 32'b0, alu_o_influence);
 wire	[63:0]	pc_influence;
-flow #(1,32)	pc_flow (disp_clk, rstn, 0, pc, 32'b0, pc_influence);
+flow #(1,32)	pc_flow (disp_clk, rstn, 1'b0, pc, 32'b0, pc_influence);
 
 reg	[1:0]		forward_a;
 reg	[1:0]		forward_b;
 
 reg [2:0]		state;
 wire [2:0] state_influence;
-flow #(0,3) state_flow (disp_clk, rstn, 0, state, 0, state_influence);
+flow #(0,3) state_flow (disp_clk, rstn, 1'b0, state, 3'b0, state_influence);
 
 reg mem_write, mem_write_data, mem_addr, mem_read_data;
 
@@ -331,11 +331,11 @@ end
 
 always @(posedge disp_clk, negedge rstn) begin
 	if (!rstn) begin
-		rom_addr <= 6'b0;
+		rom_addr <= 7'b0;
 		pc_next <= 32'b0;
 	end
 	else begin
-		if ( rom_addr == ROM_NUM ) rom_addr <= 6'd0;
+		if ( rom_addr == ROM_NUM ) rom_addr <= 7'd0;
 		else rom_addr <= rom_addr + 1;
 		if (pc_write) pc_next <= pc_write_data;
 		else pc_next <= pc + 4;
@@ -373,7 +373,7 @@ dist_mem_gen_0 U_IM0(
 );
 
 dist_mem_gen_1 U_IM1(
-  .a(instr_pc),
+  .a(instr_pc[6:0]),
   .spo(instr_disp)
 );
 

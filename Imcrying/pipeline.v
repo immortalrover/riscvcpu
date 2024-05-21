@@ -56,12 +56,12 @@ wire	[4:0]		rs2_influence;
 flow #(0,5)		rs2_flow (disp_clk, rstn, ~hazard, rs2, 5'b0, rs2_influence);
 
 wire	[4:0]		rd = instr_influence[11:7];
-wire	[14:0]		rd_influence;
+wire	[14:0]	rd_influence;
 flow #(2,5)		rd_flow (disp_clk, rstn, ~hazard, rd, 5'b0, rd_influence);
 
 reg		[31:0]	imm;
 wire	[63:0]	imm_influence;
-flow #(1,32)	imm_flow (disp_clk, rstn, 1'b0, imm, 32'b0, imm_influence);
+flow #(1,32)	imm_flow (disp_clk, rstn, 1'b1, imm, 32'b0, imm_influence);
 always @(*) begin
 	case(opcode) // opcode
 		7'b0010011, 7'b1100111, 7'b0000011:	// FMT I
@@ -91,10 +91,10 @@ end
 
 reg					reg_write;
 wire				reg_write_influence;
-flow #(0,1) reg_write_flow (disp_clk, rstn, 1'b0, reg_write, 1'b0, reg_write_influence);
+flow #(0,1) reg_write_flow (disp_clk, rstn, 1'b1, reg_write, 1'b0, reg_write_influence);
 reg	[31:0]	reg_write_data;
 wire [31:0]	reg_write_data_influence;
-flow #(0,32) reg_write_data_flow (disp_clk, rstn, 1'b0, reg_write_data, 0, reg_write_data_influence);
+flow #(0,32) reg_write_data_flow (disp_clk, rstn, 1'b1, reg_write_data, 0, reg_write_data_influence);
 reg		[31:0]	R[31:0];
 always @(negedge disp_clk) begin
 	if (reg_write_influence && rd_influence[14:10] != 0) begin
@@ -117,16 +117,22 @@ reg	[1:0]		forward_b;
 
 reg [2:0]		state;
 wire [2:0] state_influence;
-flow #(0,3) state_flow (disp_clk, rstn, 1'b0, state, 3'b0, state_influence);
+flow #(0,3) state_flow (disp_clk, rstn, 1'b1, state, 3'b0, state_influence);
 
 reg mem_write, mem_write_data, mem_addr, mem_read_data;
 
 always @(*) begin
 	if (~flush_influence) begin
-		forward_a[0] = rs1_influence == 0 ? 0 : rs1_influence == rd_influence[14:10];
-		forward_a[1] = rs1_influence == 0 ? 0 : rs1_influence == rd_influence[9:5];
-		forward_b[0] = rs2_influence == 0 ? 0 : rs2_influence == rd_influence[14:10];
-		forward_b[1] = rs2_influence == 0 ? 0 : rs2_influence == rd_influence[9:5];
+		if (rs1_influence != 5'b0) begin
+			if (rs1_influence == rd_influence[14:10]) forward_a = 2'b01;
+			else if (rs1_influence == rd_influence[9:5]) forward_a = 2'b10;
+			else forward_a = 2'b00;
+		end
+		if (rs2_influence != 5'b0) begin
+			if (rs2_influence == rd_influence[14:10]) forward_b = 2'b01;
+			else if (rs2_influence == rd_influence[9:5]) forward_b = 2'b10;
+			else forward_b = 2'b00;
+		end
 	end
 
 	if (~flush) begin
@@ -247,6 +253,9 @@ always @(*) begin
 			end
 			7'b0110111: // FMT U lui
 			begin
+				alu_x = 32'b0;
+				alu_y = 32'b0;
+				alu_op = `ADD;
 				state	=	`LUIREGWRITE;
 			end
 			7'b0010111: // FMT U auipc
@@ -329,9 +338,6 @@ always @(*) begin
 		if (pc_write) pc_next = pc_write_data;
 		else pc_next = pc + 4;
 end
-
-
-
 
 always @(posedge disp_clk, negedge rstn) begin
 	if (!rstn) begin

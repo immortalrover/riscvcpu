@@ -401,18 +401,13 @@ always @(*) begin
 end
 
 wire mem_read = state == `MEMREAD;
-always @(posedge mem_read, negedge rstn) begin
-	if (!rstn) hazard <= 0;
-	else if ((rs1 == rd_influence[4:0]) || (rs2 == rd_influence[4:0])) hazard <= 1'b1;
-	else hazard <= 0;
-end
-
 wire hazard_influence;
 flow #(0,1) hazard_flow (disp_clk, rstn, 1'b1, hazard, 1'b0, hazard_influence);
-always @(posedge hazard_influence) begin
-	if (hazard_influence) begin
-		hazard <= 1'b0;
-	end
+always @(posedge mem_read, negedge rstn, posedge hazard_influence) begin
+	if (!rstn) hazard <= 1'b0;
+	else if (hazard_influence) hazard <= 1'b0;
+	else if (mem_read && (rs1 == rd_influence[4:0]) || (rs2 == rd_influence[4:0])) hazard <= 1'b1;
+	else hazard <= 1'b0;
 end
 
 always @(posedge disp_clk, negedge rstn) begin

@@ -418,7 +418,7 @@ end
 always @(posedge disp_clk, negedge rstn) begin
 	if (!rstn) begin
 		rom_addr <= 7'b0;
-		pc_next <= 32'b0;
+		pc <= 32'b0;
 	end
 	else begin
 		if ( rom_addr == ROM_NUM ) rom_addr <= 7'd0;

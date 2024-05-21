@@ -25,15 +25,17 @@ parameter ROM_NUM = 23;
 reg		[31:0]	pc;
 reg		[31:0]	pc_next;
 wire	[31:0]	instr_pc = pc >> 2;
-reg	pc_write, pc_write_data, hazard;
+reg						pc_write;
+reg		[31:0]	pc_write_data;
+reg						hazard;
 wire	[31:0]	instr_disp;
 wire	[31:0]	instr_influence;
 flow #(0,32)	instr_flow (disp_clk, rstn, ~hazard, instr_disp, 32'h00000013, instr_influence);
 wire	[1:0]		pc_write_influence;
-flow #(1,1)		pc_write_flow (disp_clk, rstn, 1'b0, pc_write, 1'b0, pc_write_influence);
+flow #(1,1)		pc_write_flow (disp_clk, rstn, 1'b1, pc_write, 1'b0, pc_write_influence);
 wire					flush = pc_write || pc_write_influence[1] || pc_write_influence[0];
 wire					flush_influence;
-flow #(0,1)		flush_flow (disp_clk, rstn, 1'b0, flush, 1'b0, flush_influence);
+flow #(0,1)		flush_flow (disp_clk, rstn, 1'b1, flush, 1'b0, flush_influence);
 
 wire	[6:0]		opcode = instr_influence[6:0];
 wire	[6:0]		opcode_influence;
@@ -82,13 +84,6 @@ always @(*) begin
 	endcase
 end
 
-reg mem_read;
-always @(posedge mem_read, negedge rstn) begin
-	if (!rstn) hazard <= 0;
-	else if ((rs1 == rd_influence[4:0]) || (rs2 == rd_influence[4:0])) hazard <= 1;
-	else hazard <= 0;
-end
-
 reg					reg_write;
 wire				reg_write_influence;
 flow #(0,1) reg_write_flow (disp_clk, rstn, 1'b1, reg_write, 1'b0, reg_write_influence);
@@ -108,9 +103,9 @@ reg		[3:0]		alu_op;
 wire	[31:0]	alu_o;
 alu U_alu (alu_op, alu_x, alu_y, alu_o);
 wire	[31:0]	alu_o_influence;
-flow #(0,32)	alu_o_flow (disp_clk, rstn, 1'b0, alu_o, 32'b0, alu_o_influence);
+flow #(0,32)	alu_o_flow (disp_clk, rstn, 1'b1, alu_o, 32'b0, alu_o_influence);
 wire	[63:0]	pc_influence;
-flow #(1,32)	pc_flow (disp_clk, rstn, 1'b0, pc, 32'b0, pc_influence);
+flow #(1,32)	pc_flow (disp_clk, rstn, 1'b1, pc, 32'b0, pc_influence);
 
 reg	[1:0]		forward_a;
 reg	[1:0]		forward_b;
@@ -119,20 +114,29 @@ reg [2:0]		state;
 wire [2:0] state_influence;
 flow #(0,3) state_flow (disp_clk, rstn, 1'b1, state, 3'b0, state_influence);
 
-reg mem_write, mem_write_data, mem_addr, mem_read_data;
+reg				mem_write;
+reg [31:0] mem_addr;
+reg [31:0] mem_write_data;
+reg [31:0] mem_read_data;
+
+reg [31:0] RAM[0:1000];
 
 always @(*) begin
+	if (pc_write) pc_next = pc_write_data;
+	else pc_next = pc + 4;
+
 	if (~flush_influence) begin
 		if (rs1_influence != 5'b0) begin
-			if (rs1_influence == rd_influence[14:10]) forward_a = 2'b01;
-			else if (rs1_influence == rd_influence[9:5]) forward_a = 2'b10;
+			if (rs1_influence == rd_influence[9:5]) forward_a = 2'b10;
+			else if (rs1_influence == rd_influence[14:10]) forward_a = 2'b01;
 			else forward_a = 2'b00;
-		end
+		end else forward_a = 2'b00;
+
 		if (rs2_influence != 5'b0) begin
-			if (rs2_influence == rd_influence[14:10]) forward_b = 2'b01;
-			else if (rs2_influence == rd_influence[9:5]) forward_b = 2'b10;
+			if (rs2_influence == rd_influence[9:5]) forward_b = 2'b10;
+			else if (rs2_influence == rd_influence[14:10]) forward_b = 2'b01;
 			else forward_b = 2'b00;
-		end
+		end else forward_b = 2'b00;
 	end
 
 	if (~flush) begin
@@ -151,13 +155,13 @@ always @(*) begin
 				endcase
 				case (forward_a)
 					2'b00: alu_x = R[rs1_influence];
-					2'b01: alu_x = reg_write_data;
+					2'b01: alu_x = reg_write_data_influence;
 					2'b11,2'b10: alu_x = alu_o_influence;
 					default: alu_x = R[rs1_influence];
 				endcase
 				case (forward_b)
 					2'b00: alu_y = R[rs2_influence];
-					2'b01: alu_y = reg_write_data;
+					2'b01: alu_y = reg_write_data_influence;
 					2'b11,2'b10: alu_y = alu_o_influence;
 					default: alu_y = R[rs2_influence];
 				endcase
@@ -177,7 +181,7 @@ always @(*) begin
 				endcase
 				case (forward_a)
 					2'b00: alu_x = R[rs1_influence];
-					2'b01: alu_x = reg_write_data;
+					2'b01: alu_x = reg_write_data_influence;
 					2'b11,2'b10: alu_x = alu_o_influence;
 					default: alu_x = R[rs1_influence];
 				endcase
@@ -188,7 +192,7 @@ always @(*) begin
 			begin
 				case (forward_a)
 					2'b00: alu_x = R[rs1_influence];
-					2'b01: alu_x = reg_write_data;
+					2'b01: alu_x = reg_write_data_influence;
 					2'b11,2'b10: alu_x = alu_o_influence;
 					default: alu_x = R[rs1_influence];
 				endcase
@@ -200,7 +204,7 @@ always @(*) begin
 			begin
 				case (forward_a)
 					2'b00: alu_x = R[rs1_influence];
-					2'b01: alu_x = reg_write_data;
+					2'b01: alu_x = reg_write_data_influence;
 					2'b11,2'b10: alu_x = alu_o_influence;
 					default: alu_x = R[rs1_influence];
 				endcase
@@ -220,13 +224,13 @@ always @(*) begin
 				endcase
 				case (forward_a)
 					2'b00: alu_x = R[rs1_influence];
-					2'b01: alu_x = reg_write_data;
+					2'b01: alu_x = reg_write_data_influence;
 					2'b11,2'b10: alu_x = alu_o_influence;
 					default: alu_x = R[rs1_influence];
 				endcase
 				case (forward_b)
 					2'b00: alu_y = R[rs2_influence];
-					2'b01: alu_y = reg_write_data;
+					2'b01: alu_y = reg_write_data_influence;
 					2'b11,2'b10: alu_y = alu_o_influence;
 					default: alu_y = R[rs2_influence];
 				endcase
@@ -243,7 +247,7 @@ always @(*) begin
 			begin
 				case (forward_a)
 					2'b00: alu_x = R[rs1_influence];
-					2'b01: alu_x = reg_write_data;
+					2'b01: alu_x = reg_write_data_influence;
 					2'b11,2'b10: alu_x = alu_o_influence;
 					default: alu_x = R[rs1_influence];
 				endcase
@@ -267,6 +271,12 @@ always @(*) begin
 			end
 			default: state = `IDLE;
 		endcase
+	end
+	else begin
+		alu_x = 32'b0;
+		alu_y = 32'b0;
+		alu_op = `ADD;
+		state = `IDLE;
 	end
 
 	case (state_influence)
@@ -335,8 +345,74 @@ always @(*) begin
 		end
 	endcase
 
-		if (pc_write) pc_next = pc_write_data;
-		else pc_next = pc + 4;
+	if (mem_write) 
+	case (mem_addr[1:0])
+		0:
+		case (funct3_influence[5:3])
+	    0: RAM[mem_addr[11:2]][7:0]	= mem_write_data[7:0]; // sb
+	    1: RAM[mem_addr[11:2]][15:0]	= mem_write_data[15:0]; // sh
+	    2: RAM[mem_addr[11:2]]				= mem_write_data; // sw
+	  endcase
+		1:
+		case (funct3_influence[5:3])
+	    0: RAM[mem_addr[11:2]][15:8] = mem_write_data[7:0]; // sb
+	    1: RAM[mem_addr[11:2]][23:8]	= mem_write_data[15:0]; // sh
+	  endcase
+		2:
+		case (funct3_influence[5:3])
+	    0: RAM[mem_addr[11:2]][23:16]= mem_write_data[7:0]; // sb
+	    1: RAM[mem_addr[11:2]][31:16]= mem_write_data[15:0]; // sh
+	  endcase
+		3:
+		case (funct3_influence[5:3])
+	    0: RAM[mem_addr[11:2]][31:24]= mem_write_data[7:0]; // sb
+	  endcase
+	endcase
+
+	case (mem_addr[1:0])
+		0:
+		case (funct3_influence[5:3])
+			0: mem_read_data = { { 24{ RAM[mem_addr[11:2]][7] } }, RAM[mem_addr[11:2]][7:0] }; // lb
+			1: mem_read_data = { { 16{ RAM[mem_addr[11:2]][15] } }, RAM[mem_addr[11:2]][15:0] }; // lh lhu
+			2: mem_read_data = RAM[mem_addr[11:2]]; // lw
+			4: mem_read_data = { 24'b0 , RAM[mem_addr[11:2]][7:0] }; // lbu
+			5: mem_read_data = { 16'b0 , RAM[mem_addr[11:2]][15:0] }; // lhu
+	  endcase
+		1:
+		case (funct3_influence[5:3])
+			0: mem_read_data = { { 24{ RAM[mem_addr[11:2]][15] } }, RAM[mem_addr[11:2]][15:8] }; // lb lbu
+			1: mem_read_data = { { 16{ RAM[mem_addr[11:2]][23] } }, RAM[mem_addr[11:2]][23:8] }; // lh lhu
+			4: mem_read_data = { 24'b0 , RAM[mem_addr[11:2]][15:8] }; // lbu
+			5: mem_read_data = { 16'b0 , RAM[mem_addr[11:2]][23:8] }; // lhu
+	  endcase
+		2:
+		case (funct3_influence[5:3])
+			0: mem_read_data = { { 24{ RAM[mem_addr[11:2]][23] } }, RAM[mem_addr[11:2]][23:16] }; // lb lbu
+			1: mem_read_data = { { 16{ RAM[mem_addr[11:2]][31] } }, RAM[mem_addr[11:2]][31:16] }; // lh lhu
+			4: mem_read_data = { 24'b0 , RAM[mem_addr[11:2]][23:16] }; // lbu
+			5: mem_read_data = { 16'b0 , RAM[mem_addr[11:2]][31:16] }; // lhu
+	  endcase
+		3:
+		case (funct3_influence[5:3])
+			0: mem_read_data = { { 24{ RAM[mem_addr[11:2]][31] } }, RAM[mem_addr[11:2]][31:24] }; // lb lbu
+			4: mem_read_data = { 24'b0 , RAM[mem_addr[11:2]][31:24] }; // lbu
+		endcase
+	endcase
+end
+
+wire mem_read = state == `MEMREAD;
+always @(posedge mem_read, negedge rstn) begin
+	if (!rstn) hazard <= 0;
+	else if ((rs1 == rd_influence[4:0]) || (rs2 == rd_influence[4:0])) hazard <= 1'b1;
+	else hazard <= 0;
+end
+
+wire hazard_influence;
+flow #(0,1) hazard_flow (disp_clk, rstn, 1'b1, hazard, 1'b0, hazard_influence);
+always @(posedge hazard_influence) begin
+	if (hazard_influence) begin
+		hazard <= 1'b0;
+	end
 end
 
 always @(posedge disp_clk, negedge rstn) begin

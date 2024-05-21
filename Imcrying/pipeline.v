@@ -437,13 +437,13 @@ always @(sw_i) begin
 		4'b0110: display_data <= R[rs1];
 		4'b0111: display_data <= rs2;
 		4'b1000: display_data <= R[rs2];
-		4'b1001: display_data <= alu_x;
-		4'b1010: display_data <= alu_y;
-		4'b1011: display_data <= alu_o;
-		4'b1100: display_data <= imm;
-		4'b1101: display_data <= rd;
-		4'b1110: display_data <= reg_write_data;
-		4'b1111: display_data <= state;
+		4'b1001: display_data <= alu_o;
+		4'b1010: display_data <= rd;
+		4'b1011: display_data <= reg_write_data;
+		4'b1100: display_data <= pc_write_data;
+		4'b1101: display_data <= mem_write_data;
+		4'b1110: display_data <= mem_read_data;
+		4'b1111: display_data <= mem_addr;
     default: display_data <= sw_i;
   endcase 
 end
